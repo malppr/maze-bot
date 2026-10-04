@@ -5,3 +5,7 @@
 {"step": 5000160, "stage": 3, "score": 0.8399999999999999, "open": 0.99, "obstacles": 0.98, "scribbles": 0.91, "mazes": 0.47, "mixed": 0.85}
 {"step": 6000192, "stage": 3, "score": 0.842, "open": 1.0, "obstacles": 0.97, "scribbles": 0.91, "mazes": 0.47, "mixed": 0.86}
 {"step": 7000224, "stage": 4, "score": 0.852, "open": 1.0, "obstacles": 0.97, "scribbles": 0.91, "mazes": 0.52, "mixed": 0.86}
+{"step": 8000256, "stage": 4, "score": 0.852, "open": 1.0, "obstacles": 0.97, "scribbles": 0.91, "mazes": 0.52, "mixed": 0.86}
+{"step": 9000288, "stage": 4, "score": 0.8540000000000001, "open": 1.0, "obstacles": 0.97, "scribbles": 0.91, "mazes": 0.53, "mixed": 0.86}
+{"step": 10000320, "stage": 4, "score": 0.858, "open": 1.0, "obstacles": 0.97, "scribbles": 0.93, "mazes": 0.54, "mixed": 0.85}
+{"step": 11000352, "stage": 4, "score": 0.8540000000000001, "open": 1.0, "obstacles": 0.97, "scribbles": 0.91, "mazes": 0.53, "mixed": 0.86}

@@ -1,0 +1,144 @@
+{
+ "policy": "artifacts/runs/mix_fwd5mem_12x12x4_s0/weights.json",
+ "n_per_category": 1000,
+ "eval_seed": 20261004,
+ "categories": {
+  "open": {
+   "n": 1000,
+   "success": 1.0,
+   "ci95": [
+    0.9961731014136095,
+    1.0
+   ],
+   "spl": 0.9669759957683735,
+   "time_to_goal_s": 5.264066666666666,
+   "contacts_per_ep": 0.0,
+   "reverse_frac": 0.001520421971187671,
+   "failures": {
+    "stuck": 0.0,
+    "looping": 0.0,
+    "progressing": 0.0
+   }
+  },
+  "obstacles": {
+   "n": 1000,
+   "success": 0.972,
+   "ci95": [
+    0.9598295551975795,
+    0.9805578525368679
+   ],
+   "spl": 0.912461073992801,
+   "time_to_goal_s": 5.9580932784636484,
+   "contacts_per_ep": 9.551,
+   "reverse_frac": 0.00454548572972144,
+   "failures": {
+    "stuck": 0.017,
+    "looping": 0.009,
+    "progressing": 0.002
+   }
+  },
+  "scribbles": {
+   "n": 1000,
+   "success": 0.933,
+   "ci95": [
+    0.9157875981239373,
+    0.9468983077002487
+   ],
+   "spl": 0.8704921421145478,
+   "time_to_goal_s": 6.139764201500536,
+   "contacts_per_ep": 7.486,
+   "reverse_frac": 0.00825755024891733,
+   "failures": {
+    "stuck": 0.008,
+    "looping": 0.047,
+    "progressing": 0.012
+   }
+  },
+  "mazes": {
+   "n": 1000,
+   "success": 0.571,
+   "ci95": [
+    0.540109552848234,
+    0.6013470275524984
+   ],
+   "spl": 0.49854450056797533,
+   "time_to_goal_s": 10.348394629305313,
+   "contacts_per_ep": 34.327,
+   "reverse_frac": 0.04199043358569618,
+   "failures": {
+    "stuck": 0.003,
+    "looping": 0.349,
+    "progressing": 0.077
+   }
+  },
+  "mixed": {
+   "n": 1000,
+   "success": 0.859,
+   "ci95": [
+    0.8360530673212659,
+    0.8791992194937056
+   ],
+   "spl": 0.8041771981877261,
+   "time_to_goal_s": 6.230966239813736,
+   "contacts_per_ep": 43.84,
+   "reverse_frac": 0.008743895678433117,
+   "failures": {
+    "stuck": 0.084,
+    "looping": 0.045,
+    "progressing": 0.012
+   }
+  },
+  "traps": {
+   "n": 1000,
+   "success": 0.757,
+   "ci95": [
+    0.7294659857580157,
+    0.7825669883685797
+   ],
+   "spl": 0.47298319061923766,
+   "time_to_goal_s": 13.420079260237781,
+   "contacts_per_ep": 9.59,
+   "reverse_frac": 0.01916401928280937,
+   "failures": {
+    "stuck": 0.01,
+    "looping": 0.185,
+    "progressing": 0.048
+   }
+  },
+  "presets": {
+   "n": 1000,
+   "success": 0.932,
+   "ci95": [
+    0.9146857880858408,
+    0.946007771535518
+   ],
+   "spl": 0.8475006805262958,
+   "time_to_goal_s": 7.774964234620887,
+   "contacts_per_ep": 11.017,
+   "reverse_frac": 0.008637006793716385,
+   "failures": {
+    "stuck": 0.0,
+    "looping": 0.055,
+    "progressing": 0.013
+   }
+  },
+  "mazes_easy": {
+   "n": 1000,
+   "success": 0.918,
+   "ci95": [
+    0.8993524099554584,
+    0.9334483028263192
+   ],
+   "spl": 0.8210132405249617,
+   "time_to_goal_s": 7.855337690631807,
+   "contacts_per_ep": 5.32,
+   "reverse_frac": 0.005031182430318134,
+   "failures": {
+    "stuck": 0.0,
+    "looping": 0.065,
+    "progressing": 0.017
+   }
+  }
+ },
+ "seconds": 55.39603800000623
+}

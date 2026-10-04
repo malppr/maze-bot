@@ -1,0 +1,58 @@
+seed: 0
+hidden:
+- 12
+- 12
+- 4
+value_hidden:
+- 64
+- 64
+critic_extras: true
+critic_path_dir: true
+sim:
+  prev_action_inputs: true
+n_envs: 96
+n_workers: 12
+total_steps: 30000000
+torch_threads: 2
+checkpoint_every: 2000000
+ppo:
+  n_steps: 128
+  batch_size: 4096
+  n_epochs: 10
+  learning_rate: 0.0003
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_range: 0.2
+  ent_coef: 0.0
+  max_grad_norm: 0.5
+  log_std_init: -0.5
+std_schedule:
+  start: 0.6
+  end: 0.1
+  steps: 6000000
+reward: {}
+curriculum:
+  threshold: 0.8
+  window: 1000
+  min_steps: 500000
+  max_steps_per_stage: 5000000
+  stages:
+  - open: 1.0
+  - open: 0.3
+    obstacles: 0.7
+  - open: 0.1
+    obstacles: 0.3
+    scribbles: 0.6
+  - obstacles: 0.2
+    scribbles: 0.3
+    mazes: 0.5
+  - open: 0.05
+    obstacles: 0.2
+    scribbles: 0.3
+    mazes: 0.25
+    mixed: 0.2
+validation:
+  every: 1000000
+  n: 100
+  patience: 4
+  min_delta: 0.01
