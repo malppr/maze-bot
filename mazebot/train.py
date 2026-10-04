@@ -65,7 +65,7 @@ def std_schedule_callback(start: float, end: float, steps: int):
     return StdSchedule()
 
 
-def curriculum_callback(stages, threshold, window, min_steps, max_steps, log_every=50_000):
+def curriculum_callback(stages, threshold, window, min_steps, max_steps, log_every=50_000, start_stage=0):
     from stable_baselines3.common.callbacks import BaseCallback
 
     class Curriculum(BaseCallback):
@@ -89,7 +89,10 @@ def curriculum_callback(stages, threshold, window, min_steps, max_steps, log_eve
             print(f"[curriculum] step {self.num_timesteps:,}: stage {k} {stages[k]}", flush=True)
 
         def _on_training_start(self):
-            self.history.append({"stage": 0, "step": 0, "mix": stages[0]})
+            if start_stage:
+                self._set_stage(start_stage)
+            else:
+                self.history.append({"stage": 0, "step": 0, "mix": stages[0]})
 
         def _on_step(self):
             for done, info in zip(self.locals["dones"], self.locals["infos"], strict=True):
@@ -207,27 +210,38 @@ def train(cfg: dict, name: str):
         unknown = set(st) - set(mapgen.CATEGORIES)
         assert not unknown, f"unknown categories {unknown}"
     reward = cfg.get("reward", {})
-    fns = [make_env(i, cfg["seed"], stages[0], reward, cfg.get("sim")) for i in range(cfg["n_envs"])]
+    start_stage = cur.get("start_stage", 0)
+    fns = [
+        make_env(i, cfg["seed"], stages[start_stage], reward, cfg.get("sim")) for i in range(cfg["n_envs"])
+    ]
     venv = BatchedSubprocVecEnv(fns, cfg.get("n_workers", 12))
 
     ppo = dict(cfg["ppo"])
     log_std_init = ppo.pop("log_std_init", 0.0)
-    model = PPO(
-        "MlpPolicy",
-        venv,
-        policy_kwargs=dict(
-            net_arch=dict(pi=list(cfg["hidden"]), vf=list(cfg.get("value_hidden", [64, 64]))),
-            activation_fn=torch.nn.Tanh,
-            log_std_init=log_std_init,
-        ),
-        seed=cfg["seed"],
-        device="cpu",
-        tensorboard_log=str(out / "tb"),
-        verbose=0,
-        **ppo,
-    )
+    if cfg.get("resume_from"):  # continue an earlier run's model (weights, optimizer state, step counter)
+        model = PPO.load(cfg["resume_from"], env=venv, device="cpu", tensorboard_log=str(out / "tb"))
+    else:
+        model = PPO(
+            "MlpPolicy",
+            venv,
+            policy_kwargs=dict(
+                net_arch=dict(pi=list(cfg["hidden"]), vf=list(cfg.get("value_hidden", [64, 64]))),
+                activation_fn=torch.nn.Tanh,
+                log_std_init=log_std_init,
+            ),
+            seed=cfg["seed"],
+            device="cpu",
+            tensorboard_log=str(out / "tb"),
+            verbose=0,
+            **ppo,
+        )
     curriculum = curriculum_callback(
-        stages, cur["threshold"], cur["window"], cur["min_steps"], cur["max_steps_per_stage"]
+        stages,
+        cur["threshold"],
+        cur["window"],
+        cur["min_steps"],
+        cur["max_steps_per_stage"],
+        start_stage=start_stage,
     )
     ckpt = CheckpointCallback(cfg.get("checkpoint_every", 2_000_000) // cfg["n_envs"], str(out / "ckpt"))
     v = cfg.get("validation", {})
@@ -248,7 +262,13 @@ def train(cfg: dict, name: str):
         callbacks.append(std_schedule_callback(sc["start"], sc["end"], sc["steps"]))
 
     t0 = time.perf_counter()
-    model.learn(cfg["total_steps"], callback=callbacks, tb_log_name="ppo", progress_bar=False)
+    model.learn(
+        cfg["total_steps"],
+        callback=callbacks,
+        tb_log_name="ppo",
+        progress_bar=False,
+        reset_num_timesteps=not cfg.get("resume_from"),
+    )
     secs = time.perf_counter() - t0
     model.save(out / "model")
     venv.close()
@@ -281,12 +301,21 @@ def main():
     ap.add_argument("--name", default=None)
     ap.add_argument("--seed", type=int, default=None)
     ap.add_argument("--hidden", default=None, help="actor hidden sizes, e.g. 8,8 or 64,64")
+    ap.add_argument("--resume", default=None, help="model.zip of an earlier run to continue")
+    ap.add_argument("--start-stage", type=int, default=None, help="curriculum stage to start in")
+    ap.add_argument("--patience", type=int, default=None, help="early-stop patience (large = off)")
     args = ap.parse_args()
     cfg = yaml.safe_load(Path(args.config).read_text(encoding="utf-8"))
     if args.steps:
         cfg["total_steps"] = args.steps
     if args.seed is not None:
         cfg["seed"] = args.seed
+    if args.resume:
+        cfg["resume_from"] = args.resume
+    if args.start_stage is not None:
+        cfg["curriculum"]["start_stage"] = args.start_stage
+    if args.patience is not None:
+        cfg.setdefault("validation", {})["patience"] = args.patience
     if args.hidden:
         cfg["hidden"] = [int(h) for h in args.hidden.split(",")]
     name = args.name or f"{Path(args.config).stem}_s{cfg['seed']}"
