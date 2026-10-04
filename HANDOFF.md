@@ -5,7 +5,8 @@ Prompt for the next Claude instance. Paste everything below the line.
 ---
 
 You are continuing work with Bryan on his portfolio. Your job: **take the trained "Wheely's maze" policy and put it
-live on his site as an interactive demo plus a project page** — maze-bot milestones M3 → M6.
+live on his site as an interactive demo (several Wheely versions, see below) plus a project page** — maze-bot
+milestones M3 → M6.
 
 ## Repos — read these first
 
@@ -42,6 +43,32 @@ Windows 11, Git Bash + PowerShell. Node 24 at `C:\Program Files\nodejs` (add to 
 wheel command (memory). Matches/beats a hand-coded controller in 6 of 7 test categories; mazes are the honest gap
 (59.7% vs 68.6%). Reaches B on 5 of 6 presets; loops inside "The trap" (intended demo moment). No reversing
 (body speed floored at 0), spin in place allowed.
+
+## Multiple Wheelys (Bryan wants the progression demoable)
+
+Bryan wants visitors to be able to switch between versions of Wheely — including the hand-written heuristic —
+and the write-up to show the progress and lessons. Agree the final list and the UI (e.g. a version picker with a
+one-line "what this version learned") with him before building. Candidates (sources under `artifacts/runs/`):
+
+| id | source | shows |
+|---|---|---|
+| heuristic | `mazebot/baselines.py:ReactivePolicy` (port it; no weights) | the hand-written rule every version is measured against |
+| v0 blind reverser | `v0_blind_reverse/val/step_005000160.json` | learned to drive backwards blind; test: open 73%, mazes 16%, stuck in 77% of mazes |
+| v2 freezer | `v2_probe/val/step_003000096.json` | wall penalty too high → freezes, even in open space |
+| v3 first working | `mix_6x6_s0/weights.json` | 8 inputs, 8-6-6-2; level with the heuristic on easy layouts |
+| v4 360° vision | `mix_360_12x12_s0/weights.json` | rays all around; traps 18% → 64% |
+| v5 memory | `mix_fwd5mem_12x12_s0/weights.json` | previous wheel commands as inputs; first to beat the heuristic in several categories |
+| final | `mix_fwd5mem_12x12_pcrit_s0/weights.json` (= `artifacts/release/weights.json`) | shipped policy |
+| GRU (optional) | `mix_fwd5mem_gru8x4_s0/weights.json` (`"type": "gru"`) | recurrent memory; didn't help; needs a GRU forward pass (`mazebot/recurrent.py`) |
+
+Consequences for the port and demo: the TS sim must be driven entirely by each version's `sim_params` (ray angles,
+number of inputs, goal-input mode, memory inputs, `reverse_max`), and the network panel must adapt to each
+architecture (8-6-6-2, 10-12-12-2, 10-12-12-4-2, GRU; the heuristic has no network → show the rule instead).
+**Gotcha:** files from the v0 run predate the `reverse_max` setting — load them with `reverse_max: 1.0` or they
+silently lose reversing. Test-set numbers per run: `artifacts/release/all_runs_test_set.md`.
+`scripts/make_versions.py` is an unrun draft that builds `artifacts/release/versions/` (weights with corrected
+sim_params, test-set evals, a GIF per version on "Rooms", an all-versions × all-presets image, `versions.json`
+manifest). Adjust the list with Bryan first; it takes ~15 min and briefly uses 12 CPU workers.
 
 ## Plan
 
