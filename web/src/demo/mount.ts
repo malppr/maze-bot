@@ -31,7 +31,8 @@ const BRUSH = 0.1; // drawn wall radius (training strokes: 0.04-0.2)
 const ERASER = 0.25;
 const RDP_EPS = 0.03;
 const MAX_WALLS = 400; // capsules, keeps phones fast
-const PORTRAIT_BELOW = 600; // container px
+const PORTRAIT_BELOW = 480; // container px: phones get the tall arena
+const NARROW_BELOW = 600; // container px: compact brain strip (matches the CSS container query)
 const SPEEDS = [0.5, 1, 4];
 const MAX_TRACE = 4000;
 const HINT_AFTER = 4; // seconds of driving before the drawing tip appears
@@ -366,7 +367,7 @@ export function mountMazeDemo(el: HTMLElement, opts: MazeDemoOptions = {}): Maze
 		}
 		tool = t;
 		stage.dataset.tool = t;
-		root.querySelectorAll<HTMLElement>('[data-tool]').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.tool === t)));
+		root.querySelectorAll<HTMLElement>('button[data-tool]').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.tool === t)));
 		eraser = undefined;
 		dirty = true;
 		kick();
@@ -628,7 +629,7 @@ export function mountMazeDemo(el: HTMLElement, opts: MazeDemoOptions = {}): Maze
 
 	// ------------------------------------------------------------------ layout, theme, visibility
 	function syncPanel(): void {
-		const narrow = root.clientWidth < PORTRAIT_BELOW;
+		const narrow = root.clientWidth < NARROW_BELOW;
 		brain.compact = narrow && !expanded;
 		panel.dataset.compact = String(brain.compact);
 		$('[data-act=enlarge]').textContent = expanded ? 'show less' : 'tap to enlarge';
@@ -647,6 +648,7 @@ export function mountMazeDemo(el: HTMLElement, opts: MazeDemoOptions = {}): Maze
 		const wantPortrait = w < PORTRAIT_BELOW;
 		if (wantPortrait !== portrait) {
 			portrait = wantPortrait;
+			root.dataset.portrait = String(portrait);
 			setMap(transpose(map));
 		} else arena.resize();
 		syncPanel();
@@ -680,6 +682,7 @@ export function mountMazeDemo(el: HTMLElement, opts: MazeDemoOptions = {}): Maze
 	);
 
 	// ------------------------------------------------------------------ start
+	root.dataset.portrait = String(portrait);
 	setTool(tool);
 	setSpeed(1);
 	arena.setWorld(map.width, map.height);

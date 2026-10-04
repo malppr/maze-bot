@@ -1,6 +1,6 @@
 {
   "name": "maze-bot",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Wheely's maze: browser port of the maze-bot sim and policies",
   "license": "MIT",
   "type": "module",
@@ -18,5 +18,13 @@
     "typescript": "^6.0.3",
     "vite": "^8.3.2",
     "vitest": "^5.0.3"
-  }
+  },
+  "files": [
+    "web/src/",
+    "presets/presets.json",
+    "artifacts/release/versions/v3-rookie/weights.json",
+    "artifacts/release/versions/v4-owl-eyes/weights.json",
+    "artifacts/release/versions/final/weights.json"
+  ],
+  "sideEffects": "false"
 }
