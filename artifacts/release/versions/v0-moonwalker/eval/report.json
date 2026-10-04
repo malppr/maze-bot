@@ -1,0 +1,144 @@
+{
+ "policy": "D:\\Proj\\maze-bot\\artifacts\\release\\versions\\v0-moonwalker\\weights.json",
+ "n_per_category": 1000,
+ "eval_seed": 20261004,
+ "categories": {
+  "open": {
+   "n": 1000,
+   "success": 0.734,
+   "ci95": [
+    0.7057552662973483,
+    0.760453745164221
+   ],
+   "spl": 0.3977205911822365,
+   "time_to_goal_s": 12.259309718437782,
+   "contacts_per_ep": 51.428,
+   "reverse_frac": 0.7218314826331621,
+   "failures": {
+    "stuck": 0.197,
+    "looping": 0.037,
+    "progressing": 0.032
+   }
+  },
+  "obstacles": {
+   "n": 1000,
+   "success": 0.543,
+   "ci95": [
+    0.5120186331754513,
+    0.5736522535461193
+   ],
+   "spl": 0.3267525329414122,
+   "time_to_goal_s": 11.790423572744015,
+   "contacts_per_ep": 122.415,
+   "reverse_frac": 0.741880682200484,
+   "failures": {
+    "stuck": 0.337,
+    "looping": 0.076,
+    "progressing": 0.044
+   }
+  },
+  "scribbles": {
+   "n": 1000,
+   "success": 0.48,
+   "ci95": [
+    0.4491702320581413,
+    0.5109828438853143
+   ],
+   "spl": 0.3078939949651925,
+   "time_to_goal_s": 10.162638888888889,
+   "contacts_per_ep": 169.152,
+   "reverse_frac": 0.7479142995182871,
+   "failures": {
+    "stuck": 0.461,
+    "looping": 0.049,
+    "progressing": 0.01
+   }
+  },
+  "mazes": {
+   "n": 1000,
+   "success": 0.156,
+   "ci95": [
+    0.13483095057810354,
+    0.17980195564933318
+   ],
+   "spl": 0.12154297078328541,
+   "time_to_goal_s": 10.046581196581197,
+   "contacts_per_ep": 398.842,
+   "reverse_frac": 0.7419568621592587,
+   "failures": {
+    "stuck": 0.774,
+    "looping": 0.06,
+    "progressing": 0.01
+   }
+  },
+  "mixed": {
+   "n": 1000,
+   "success": 0.375,
+   "ci95": [
+    0.3455257633259225,
+    0.4054309613206752
+   ],
+   "spl": 0.25448459361704334,
+   "time_to_goal_s": 10.252088888888888,
+   "contacts_per_ep": 204.883,
+   "reverse_frac": 0.7573332293373635,
+   "failures": {
+    "stuck": 0.525,
+    "looping": 0.082,
+    "progressing": 0.018
+   }
+  },
+  "traps": {
+   "n": 1000,
+   "success": 0.238,
+   "ci95": [
+    0.21263910590157722,
+    0.26536618895769143
+   ],
+   "spl": 0.09681141778289788,
+   "time_to_goal_s": 18.97927170868347,
+   "contacts_per_ep": 207.169,
+   "reverse_frac": 0.6541856850329247,
+   "failures": {
+    "stuck": 0.575,
+    "looping": 0.162,
+    "progressing": 0.025
+   }
+  },
+  "presets": {
+   "n": 1000,
+   "success": 0.46,
+   "ci95": [
+    0.4293208680902404,
+    0.49098528379667095
+   ],
+   "spl": 0.2824890505394314,
+   "time_to_goal_s": 12.559420289855073,
+   "contacts_per_ep": 191.632,
+   "reverse_frac": 0.7542031566800117,
+   "failures": {
+    "stuck": 0.444,
+    "looping": 0.067,
+    "progressing": 0.029
+   }
+  },
+  "mazes_easy": {
+   "n": 1000,
+   "success": 0.4,
+   "ci95": [
+    0.37007424033937747,
+    0.43069113937790077
+   ],
+   "spl": 0.25055950376890407,
+   "time_to_goal_s": 11.780500000000002,
+   "contacts_per_ep": 200.188,
+   "reverse_frac": 0.732284142075639,
+   "failures": {
+    "stuck": 0.507,
+    "looping": 0.07,
+    "progressing": 0.023
+   }
+  }
+ },
+ "seconds": 85.46015290007927
+}

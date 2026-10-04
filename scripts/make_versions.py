@@ -4,8 +4,9 @@
 uv run python scripts/make_versions.py [--skip-eval] [--skip-gifs]
 
 Each version gets <id>/weights.json (with the exact sim_params it was trained in), <id>/eval/ (test set, 1,000 maps
-per category), and a GIF on the "Rooms" preset. Writes versions.json (manifest for the web demo) and
-versions_presets.png (every version on every preset). The heuristic has no weights: the web port reimplements
+per category) and, unless --skip-gifs, a matplotlib GIF on the "Rooms" preset (research figure; the write-up clips
+are recorded from the web demo). Writes versions.json (manifest for the web demo: live flag, labels, arch,
+sim_params, test-set success) and versions_presets.png (every version on every preset). The heuristic has no weights: the web port reimplements
 mazebot/baselines.py:ReactivePolicy.
 """
 
@@ -30,77 +31,94 @@ ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "artifacts/release/versions"
 RUNS = ROOT / "artifacts/runs"
 
-# Chronological story. "sim_fix" patches sim_params that older files did not record.
+# Chronological story. "live": playable in the web demo; the rest appear as clips/numbers in the write-up.
+# "clip": preset the write-up clip is recorded on (from the web demo, M4). "sim_fix" patches sim_params that older
+# files did not record.
 VERSIONS = [
     dict(
         id="heuristic",
-        name="Hand-written rule",
+        name="By-the-Book",
         source=None,
         stage="baseline",
-        summary="No learning: steer to the goal, turn towards open space when blocked, keep a close wall on the goal side.",
-        lesson="A strong, simple baseline. Every learned Wheely is measured against it.",
+        live=True,
+        clip="Rooms",
+        summary="No learning, just rules written by hand: steer to the goal, turn towards open space when blocked, "
+        "keep a close wall on the goal side.",
+        lesson="A strong, simple baseline. Every learned Wheely has to beat it.",
     ),
     dict(
-        id="v0-blind-reverser",
-        name="First try: the blind reverser",
+        id="v0-moonwalker",
+        name="Moonwalker",
         source="v0_blind_reverse/val/step_005000160.json",
         sim_fix={"reverse_max": 1.0},
         stage="failure",
+        live=False,
+        clip="Open field",
         summary="8 inputs, 8-6-6-2, reversing allowed. Learned to drive backwards toward goals behind it — blind, "
         "because its rays only look forward.",
         lesson="RL takes the reward literally: reversing at the goal is 'efficient' until a wall it can't see is "
         "in the way. Training noise hid the problem; the noise-free policy got worse with more training.",
     ),
     dict(
-        id="v2-freezer",
-        name="Too scared of walls: the freezer",
+        id="v2-scaredy",
+        name="Scaredy-Wheely",
         source="v2_probe/val/step_003000096.json",
         stage="failure",
+        live=False,
+        clip="Slalom",
         summary="No reversing, but a big penalty for touching walls (0.2/step).",
-        lesson="When touching a wall costs more than standing still, 'stop when unsure' becomes the best "
-        "strategy. It freezes even in open space.",
+        lesson="When touching a wall costs more than standing still, 'stop when unsure' becomes the best strategy.",
     ),
     dict(
-        id="v3-first-working",
-        name="First working Wheely",
+        id="v3-rookie",
+        name="Rookie",
         source="mix_6x6_s0/weights.json",
         stage="milestone",
-        summary="8 inputs, 8-6-6-2 (110 numbers), no reversing, wall penalty 0.05, shrinking exploration noise.",
-        lesson="Level with the hand-written rule on open and cluttered layouts; much worse in mazes.",
+        live=True,
+        clip="Small maze",
+        summary="First Wheely that learned to drive: 8 inputs, 8-6-6-2 (110 numbers), no reversing.",
+        lesson="Level with By-the-Book on open and cluttered layouts; much worse in mazes.",
     ),
     dict(
-        id="v4-360-vision",
-        name="Eyes in the back of its head",
+        id="v4-owl-eyes",
+        name="Owl Eyes",
         source="mix_360_12x12_s0/weights.json",
         stage="milestone",
-        summary="7 rays all around (every ~51°), 10-12-12-2.",
+        live=True,
+        clip="Rooms",
+        summary="7 rays all the way around (every ~51°), 10-12-12-2.",
         lesson="Seeing behind helps it notice it drove into a pocket: traps 18% → 64%, mazes 44% → 56%.",
     ),
     dict(
         id="v5-memory",
-        name="A one-step memory",
+        name="One-step memory",
         source="mix_fwd5mem_12x12_s0/weights.json",
-        stage="milestone",
-        summary="Back to 5 forward rays + the previous wheel commands as inputs, 10-12-12-2.",
-        lesson="Remembering what it just did stops the dithering: beats the hand-written rule in 4 categories.",
+        stage="experiment",
+        live=False,
+        clip=None,
+        summary="5 forward rays + the previous wheel commands as inputs, 10-12-12-2.",
+        lesson="Remembering its last move was the biggest single gain; the final Wheely builds on it.",
     ),
     dict(
         id="final",
-        name="Final Wheely",
+        name="Wheely",
         source="mix_fwd5mem_12x12_pcrit_s0/weights.json",
         stage="final",
-        summary="Memory inputs, 10-12-12-4-2 (350 numbers), trained with a privileged critic.",
-        lesson="Matches or beats the hand-written rule in 6 of 7 categories. Still loses in winding mazes: it "
-        "won't commit to a long detour away from B.",
+        live=True,
+        clip="Slalom",
+        summary="Remembers its last move: memory inputs, 10-12-12-4-2 (350 numbers), trained with a privileged critic.",
+        lesson="Matches or beats By-the-Book in 6 of 7 test categories. Still loses in winding mazes: it won't "
+        "commit to a long detour away from B.",
     ),
     dict(
         id="gru",
-        name="Recurrent memory (GRU) — tried, didn't help",
+        name="Recurrent memory (GRU)",
         source="mix_fwd5mem_gru8x4_s0/weights.json",
         stage="experiment",
-        optional=True,
+        live=False,
+        clip=None,
         summary="GRU with 8 memory neurons → 4 → 2, trained on the GPU.",
-        lesson="Longer memory alone didn't fix mazes (55%). Optional in the demo: needs a GRU forward pass.",
+        lesson="Longer memory alone didn't fix mazes (55%).",
     ),
 ]
 
@@ -203,8 +221,7 @@ def manifest():
     out = []
     for v in VERSIONS:
         rep = json.loads((OUT / v["id"] / "eval/report.json").read_text(encoding="utf-8"))["categories"]
-        entry = {k: v[k] for k in ("id", "name", "stage", "summary", "lesson")}
-        entry["optional"] = v.get("optional", False)
+        entry = {k: v[k] for k in ("id", "name", "stage", "live", "clip", "summary", "lesson")}
         entry["kind"] = "heuristic" if v["source"] is None else ("gru" if v["id"] == "gru" else "mlp")
         entry["weights"] = None if v["source"] is None else f"{v['id']}/weights.json"
         if v["source"]:
@@ -212,10 +229,9 @@ def manifest():
             entry["arch"] = w["arch"]
             entry["sim_params"] = w["sim_params"]
         entry["test_success"] = {c: round(rep[c]["success"], 4) for c in cats}
-        entry["gif"] = f"{v['id']}/rooms.gif"
         out.append(entry)
     (OUT / "versions.json").write_text(
-        json.dumps({"preset_for_gifs": "Rooms", "versions": out}, indent=1) + "\n",
+        json.dumps({"versions": out}, indent=1) + "\n",
         encoding="utf-8",
         newline="\n",
     )
