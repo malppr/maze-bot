@@ -184,7 +184,7 @@ Each milestone ends with a check run by Claude (tests, metrics, screenshots) and
 | M1 ✅ | Geometry (capsules, rays, collision), kinematics, env, distance field, map generator (all categories + presets), matplotlib renderer | Unit tests + `check_env` pass; rendered sample sheets of every category reviewed; env steps/s measured |
 | M2 ✅ | PPO training + curriculum + held-out evaluation + baselines | Per-category held-out success rates, failure taxonomy, rollout GIFs; hidden size decided with Bryan |
 | M3 ✅ | `weights.json` export + TS sim port + parity tests | Parity tests pass locally and in CI |
-| M4 ✅ | `mountMazeDemo`: canvas, presets, draw mode, path-check warning, network panel, controls | Works in the dev page; screenshots desktop + 390 px, light + dark, reviewed |
+| M4 (in review) | `mountMazeDemo`: canvas, presets, draw mode, path-check warning, network panel, controls | Works in the dev page; screenshots desktop + 390 px, light + dark, reviewed |
 | M5 | Package release `v0.1.0`; site wiring (`maze.ts`, `IS_PREVIEW = false`, stage layout) | Site `npm run check:all` passes; Bryan reviews `npm run dev` + `npm run preview`; tag ready to push |
 | M6 | Write-up (method, reward design, results, failure modes, GIFs) → README + site project page "Wheely's maze" (tags robot-learning + ai) | Bryan review |
 
