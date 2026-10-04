@@ -20,14 +20,32 @@ container-type:inline-size;display:grid;gap:12px;color:var(--wm-fg);font:inherit
 .wm-arena.wm-grab{cursor:grab}
 .wm-status{position:absolute;top:10px;left:10px;padding:2px 10px;border:1px solid var(--wm-border);border-radius:999px;
 background:color-mix(in srgb,var(--wm-surface) 88%,transparent);font:500 12px var(--font-mono,ui-monospace,monospace);color:var(--wm-muted);pointer-events:none}
-.wm-warn{position:absolute;top:10px;right:10px;left:auto;max-width:calc(100% - 20px);padding:4px 12px;border-radius:999px;
+.wm-warn{position:absolute;top:10px;right:10px;left:auto;padding:4px 12px;border-radius:999px;
 background:var(--wm-accent);color:var(--wm-accent-fg);font-size:13px;font-weight:600;pointer-events:none}
-.wm-result{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;
+.wm-result{position:absolute;left:10px;right:10px;bottom:14px;width:fit-content;margin-inline:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;
 padding:8px 10px 8px 16px;border:1px solid var(--wm-border);border-radius:999px;background:var(--wm-surface);box-shadow:var(--shadow,0 10px 30px rgb(0 0 0/.1));
 font-weight:600;white-space:nowrap}
 .wm-result button{padding:5px 12px;border:1px solid var(--wm-border);border-radius:999px;background:var(--wm-bg);font-size:13px;font-weight:500}
 .wm-result button.wm-primary{border-color:var(--wm-fg);background:var(--wm-fg);color:var(--wm-bg)}
+.wm-hint{position:absolute;left:10px;right:10px;bottom:14px;width:fit-content;margin-inline:auto;display:flex;align-items:center;gap:10px;
+padding:6px 6px 6px 16px;border:1px solid var(--wm-accent);border-radius:999px;background:var(--wm-surface);box-shadow:var(--shadow,0 10px 30px rgb(0 0 0/.1));
+font-size:14px;font-weight:600;animation:wm-pop .35s ease-out}
+.wm-hint button{flex:none;padding:5px 12px;border:1px solid var(--wm-border);border-radius:999px;background:var(--wm-bg);font-size:13px;font-weight:600}
+.wm-hint .wm-primary{border-color:var(--wm-accent);background:var(--wm-accent);color:var(--wm-accent-fg)}
+.wm-hint .wm-x{padding:5px 9px;border:0;background:none;color:var(--wm-muted)}
+@keyframes wm-pop{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.wm-hint{animation:none}}
 .wm-note{margin:0;font-size:13px;color:var(--wm-muted)}
+.wm-layouts{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.wm-lay{display:grid;gap:4px;justify-items:center;padding:6px 6px 5px;border:1px solid var(--wm-border);border-radius:10px;background:var(--wm-surface);font-size:12.5px;font-weight:500;color:var(--wm-muted)}
+.wm-lay svg{width:100%;max-width:96px;height:auto}
+.wm-lay .wm-port{display:none}
+.wm-lay rect{fill:var(--wm-bg);stroke:var(--wm-border);stroke-width:.15}
+.wm-lay line{stroke:currentColor;stroke-linecap:round}
+.wm-lay .wm-a{fill:none;stroke:currentColor;stroke-width:.2}
+.wm-lay .wm-b{fill:var(--wm-accent)}
+.wm-lay:hover{border-color:var(--wm-muted)}
+.wm-lay[aria-checked=true]{border-color:var(--wm-fg);color:var(--wm-fg);box-shadow:inset 0 0 0 1px var(--wm-fg)}
 .wm-toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px}
 .wm-group{display:flex;align-items:center;gap:6px}
 .wm select{padding:6px 10px;border:1px solid var(--wm-border);border-radius:8px;background:var(--wm-surface);font-size:14px;font-weight:500}
@@ -68,9 +86,13 @@ font-weight:600;white-space:nowrap}
 .wm-legend{display:none}
 .wm-foot{display:flex}
 .wm-rule{grid-template-columns:1fr;gap:10px}
-.wm-result{bottom:10px;width:max-content;max-width:calc(100% - 20px);padding:8px 12px;border-radius:16px;font-size:14px;white-space:normal}
+.wm-result{bottom:10px;padding:8px 12px;border-radius:16px;font-size:14px;white-space:normal}
 .wm-result-text{flex-basis:100%;text-align:center}
 .wm-warn{top:40px;left:10px;right:auto}
+.wm-hint{bottom:10px;padding:6px 6px 6px 12px;font-size:13px}
+.wm-layouts{grid-template-columns:repeat(3,1fr);gap:6px}
+.wm-lay .wm-land{display:none}
+.wm-lay .wm-port{display:block;max-width:44px}
 }
 `;
 

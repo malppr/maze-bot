@@ -5,7 +5,7 @@ import { HeuristicPolicy } from '../policy/heuristic';
 import { MLPPolicy } from '../policy/mlp';
 import { closestPoint, polylineCapsules, rdp } from '../sim/geometry';
 import { obsNames, simParams, type SimParams } from '../sim/params';
-import { PRESETS, presetMap } from '../sim/presets';
+import { PRESETS, presetMap, type Preset } from '../sim/presets';
 import { Episode, wrapAngle, type MazeMap, type Pose } from '../sim/sim';
 import { ArenaView } from './arena';
 import { BrainView } from './brain';
@@ -34,6 +34,7 @@ const MAX_WALLS = 400; // capsules, keeps phones fast
 const PORTRAIT_BELOW = 600; // container px
 const SPEEDS = [0.5, 1, 4];
 const MAX_TRACE = 4000;
+const HINT_AFTER = 4; // seconds of driving before the drawing tip appears
 
 const ICON = {
 	reset: '<path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4h4"/>',
@@ -42,6 +43,17 @@ const ICON = {
 	step: '<path d="M6 5l9 7-9 7zM18 5v14"/>',
 };
 const svg = (p: string) => `<svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`;
+
+/** Mini map of a preset for its layout chip (walls, A and B). */
+function thumb(p: Preset): string {
+	const svg = (m: MazeMap, cls: string) => {
+		const walls = m.walls
+			.map((w) => `<line x1="${w[0]}" y1="${w[1]}" x2="${w[2]}" y2="${w[3]}" stroke-width="${Math.max(0.3, 2 * w[4])}"/>`)
+			.join('');
+		return `<svg class="${cls}" viewBox="-0.2 -0.2 ${m.width + 0.4} ${m.height + 0.4}" aria-hidden="true"><rect x="0" y="0" width="${m.width}" height="${m.height}" rx="0.3"/>${walls}<circle class="wm-a" cx="${m.start[0]}" cy="${m.start[1]}" r="0.45"/><circle class="wm-b" cx="${m.goal[0]}" cy="${m.goal[1]}" r="0.45"/></svg>`;
+	};
+	return svg(presetMap(p), 'wm-land') + svg(presetMap(p, true), 'wm-port');
+}
 
 function transpose(m: MazeMap): MazeMap {
 	return {
@@ -76,12 +88,14 @@ export function mountMazeDemo(el: HTMLElement, opts: MazeDemoOptions = {}): Maze
 			<span class="wm-warn" hidden>No path to B — Wheely will get lost</span>
 			<div class="wm-result" hidden><span class="wm-result-text"></span>
 				<button type="button" class="wm-primary" data-act="again">Again</button><button type="button" data-act="shuffle">New A/B</button></div>
+			<div class="wm-hint" hidden role="status"><span class="wm-hint-text">Try drawing a wall in Wheely’s way</span>
+				<button type="button" class="wm-primary" data-act="hint-draw">✏️ Draw</button><button type="button" class="wm-x" data-act="hint-close" aria-label="Dismiss tip">✕</button></div>
 		</div>
 		<p class="wm-note" hidden></p>
+		<div class="wm-layouts" role="radiogroup" aria-label="Layout">
+			${PRESETS.map((p) => `<button type="button" class="wm-lay" role="radio" aria-checked="${p.name === startLayout}" data-layout="${p.name}">${thumb(p)}<span>${p.name}</span></button>`).join('')}
+		</div>
 		<div class="wm-toolbar">
-			<div class="wm-group">
-				<label><span class="wm-sr">Layout</span><select class="wm-layout">${PRESETS.map((p) => `<option${p.name === startLayout ? ' selected' : ''}>${p.name}</option>`).join('')}</select></label>
-			</div>
 			<div class="wm-group">
 				<div class="wm-seg wm-tools" role="radiogroup" aria-label="Tool">
 					<button type="button" role="radio" data-tool="move" title="Drag A and B">Move</button>
@@ -114,6 +128,7 @@ export function mountMazeDemo(el: HTMLElement, opts: MazeDemoOptions = {}): Maze
 	const warnEl = $('.wm-warn');
 	const resultEl = $('.wm-result');
 	const resultText = $('.wm-result-text');
+	const hintEl = $('.wm-hint');
 	const noteEl = $('.wm-note');
 	const playBtn = $<HTMLButtonElement>('[data-act=play]');
 	const panel = $('.wm-panel');
@@ -161,6 +176,9 @@ export function mountMazeDemo(el: HTMLElement, opts: MazeDemoOptions = {}): Maze
 	let erasing = false;
 	let eraser: { x: number; y: number; r: number } | undefined;
 	let pointerId = -1;
+	// drawing tip: pops up after HINT_AFTER s of driving, gone after the first stroke / dismiss / own tool choice
+	let hint: 'waiting' | 'shown' | 'drawing' | 'done' = 'waiting';
+	let driven = 0;
 
 	const policyDt = () => p.dt * p.frameSkip;
 	const simTime = () => (ep.steps * policyDt()).toFixed(1);
@@ -174,6 +192,7 @@ export function mountMazeDemo(el: HTMLElement, opts: MazeDemoOptions = {}): Maze
 		lastAction = [0, 0];
 		resultEl.hidden = true;
 		sense();
+		hintEl.hidden = hint !== 'shown' && hint !== 'drawing';
 		syncWarn();
 		syncStatus();
 		dirty = true;
@@ -235,6 +254,8 @@ export function mountMazeDemo(el: HTMLElement, opts: MazeDemoOptions = {}): Maze
 		}
 		lastAction = action;
 		const res = ep.step(action);
+		driven += policyDt();
+		if (hint === 'waiting' && driven >= HINT_AFTER) setHint('shown');
 		trace.push(ep.pose.x, ep.pose.y);
 		if (trace.length > 2 * MAX_TRACE) trace = trace.slice(-2 * MAX_TRACE);
 		sense();
@@ -245,6 +266,7 @@ export function mountMazeDemo(el: HTMLElement, opts: MazeDemoOptions = {}): Maze
 			prev = { ...ep.pose };
 			resultText.textContent = res.success ? `Reached B in ${simTime()} s` : `Lost after ${simTime()} s`;
 			resultEl.hidden = false;
+			hintEl.hidden = true;
 			announce(res.success ? `Wheely reached B in ${simTime()} seconds.` : 'Wheely got lost.');
 		}
 		dirty = true;
@@ -327,7 +349,21 @@ export function mountMazeDemo(el: HTMLElement, opts: MazeDemoOptions = {}): Maze
 	}
 
 	// ------------------------------------------------------------------ controls
-	function setTool(t: Tool): void {
+	function setHint(h: typeof hint): void {
+		hint = h;
+		hintEl.hidden = !(h === 'shown' || h === 'drawing') || !resultEl.hidden;
+		if (h === 'drawing') {
+			$('.wm-hint-text').textContent = 'Drag across the arena to draw a wall';
+			$('[data-act=hint-draw]').hidden = true;
+		}
+	}
+
+	function setTool(t: Tool, byUser = false): void {
+		if (byUser) {
+			if (hint === 'waiting') setHint('done');
+			else if (hint === 'shown') setHint(t === 'draw' ? 'drawing' : 'done');
+			else if (hint === 'drawing' && t !== 'draw') setHint('done');
+		}
 		tool = t;
 		stage.dataset.tool = t;
 		root.querySelectorAll<HTMLElement>('[data-tool]').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.tool === t)));
@@ -390,8 +426,9 @@ export function mountMazeDemo(el: HTMLElement, opts: MazeDemoOptions = {}): Maze
 		const b = (e.target as HTMLElement).closest<HTMLElement>('button');
 		if (!b || !root.contains(b)) return;
 		if (b.dataset.v) void setVersion(b.dataset.v);
-		else if (b.dataset.tool) setTool(b.dataset.tool as Tool);
+		else if (b.dataset.tool) setTool(b.dataset.tool as Tool, true);
 		else if (b.dataset.speed) setSpeed(Number(b.dataset.speed));
+		else if (b.dataset.layout) setLayout(b.dataset.layout);
 		else
 			switch (b.dataset.act) {
 				case 'play':
@@ -422,6 +459,12 @@ export function mountMazeDemo(el: HTMLElement, opts: MazeDemoOptions = {}): Maze
 				case 'clear':
 					setWalls([], true);
 					break;
+				case 'hint-draw':
+					setTool('draw', true);
+					break;
+				case 'hint-close':
+					setHint('done');
+					break;
 				case 'enlarge':
 					expanded = !expanded;
 					syncPanel();
@@ -429,10 +472,11 @@ export function mountMazeDemo(el: HTMLElement, opts: MazeDemoOptions = {}): Maze
 			}
 	});
 
-	$<HTMLSelectElement>('.wm-layout').addEventListener('change', (e) => {
-		layout = (e.target as HTMLSelectElement).value;
-		setMap(presetMap(PRESETS.find((x) => x.name === layout)!, portrait));
-	});
+	function setLayout(name: string): void {
+		layout = name;
+		root.querySelectorAll<HTMLElement>('[data-layout]').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.layout === name)));
+		setMap(presetMap(PRESETS.find((x) => x.name === name)!, portrait));
+	}
 
 	root.addEventListener('keydown', (e) => {
 		if (e.key === ' ' && e.target === arena.canvas) {
@@ -551,6 +595,7 @@ export function mountMazeDemo(el: HTMLElement, opts: MazeDemoOptions = {}): Maze
 		} else if (stroke) {
 			const pts = rdp(stroke, RDP_EPS);
 			stroke = null;
+			if (hint !== 'done') setHint('done');
 			const caps = polylineCapsules(pts, BRUSH);
 			const rows: number[][] = [...strokeBase];
 			for (let k = 0; k < caps.length; k += 5) rows.push(Array.from(caps.subarray(k, k + 5)));
