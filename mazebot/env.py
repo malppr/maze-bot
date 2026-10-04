@@ -22,6 +22,7 @@ class RewardParams:
     time: float = 0.01  # per policy step
     reverse: float = 0.0  # per step x commanded backward speed in [0, 1] (needs reverse_max > 0)
     goal: float = 10.0  # on reaching B
+    goal_time_bonus: float = 0.0  # extra on reaching B, x fraction of the time limit left (speed bonus)
     timeout_factor: float = 3.0  # time limit = factor * (geodesic A->B / v_max) + slack
     timeout_slack: float = 10.0  # seconds
 
@@ -133,7 +134,7 @@ class MazeEnv(gym.Env):
         reward = r.progress * (self.geo - geo) - r.time - (r.contact if contact else 0.0)
         reward -= r.reverse * max(0.0, -0.5 * (ul + ur))
         if success:
-            reward += r.goal
+            reward += r.goal + r.goal_time_bonus * max(0.0, 1.0 - self.steps / self.max_steps)
         self.geo = geo
         self.last_move = math.sqrt((self.x - x0) ** 2 + (self.y - y0) ** 2)
 

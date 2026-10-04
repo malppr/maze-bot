@@ -102,3 +102,23 @@ def test_reverse_penalty_only_when_reversing_allowed_and_commanded():
     # spinning in place: no reverse penalty; full reverse: 0.1 penalty (+ negative progress)
     assert r_spin == pytest.approx(-env.rew.time, abs=1e-3)
     assert r_back < r_spin - 0.1 + 1e-9
+
+
+def test_goal_time_bonus_rewards_finishing_faster():
+    from mazebot.env import RewardParams
+
+    def finish_reward(slow_steps):
+        env = MazeEnv(maps=[open_map()], reward=RewardParams(goal_time_bonus=5.0))
+        env.reset(seed=0)
+        for _ in range(slow_steps):  # dawdle: stand still first (keeps the heading)
+            env.step([0.0, 0.0])
+        while True:
+            _, r, term, trunc, info = env.step([1.0, 1.0])
+            if term or trunc:
+                return r, info["success"], env.steps / env.max_steps
+
+    fast, ok_fast, _ = finish_reward(0)
+    slow, ok_slow, frac = finish_reward(60)
+    assert ok_fast and ok_slow
+    assert fast > slow  # same final step otherwise, so the difference is the speed bonus
+    assert slow >= 10.0  # completion always worth at least the base goal bonus
