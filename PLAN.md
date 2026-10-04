@@ -55,7 +55,7 @@ No observation normalization wrapper (inputs are already scaled), so exported we
 ### Action (2 outputs)
 
 Two outputs → `uL, uR`, **linear layer clipped to [−1, 1]** (the standard SB3 Box-action setup; deterministic action = clip(mean)).
-Sign gives direction, so spin-in-place and reverse are free.
+Per-wheel sign is free (spin in place), but **body speed is floored at 0 — no reversing** (see decisions log).
 
 ### Network
 
@@ -195,4 +195,15 @@ Each milestone ends with a check run by Claude (tests, metrics, screenshots) and
 - **2026-10-04 — Train on random shapes, not strict mazes** (drawing is the main interaction; failures should come from
   missing memory, not OOD shapes). Mazes-only vs mixed ablation in M2. Varying arena size, clipped linear outputs,
   per-step parity accepted.
+- **2026-10-05 — M2 debugging (each finding from a 3M-step probe, validation = deterministic actor):**
+  1. *Blind reversing.* With reverse allowed, the policy learned the near-linear controller
+     speed ∝ cos(goal bearing): goal behind ⇒ drive backwards, blind (rays only look forward).
+     Training noise jostled it free, so train reward rose while validation fell 0.67 → 0.47.
+     A 30% reverse cap didn't help (still reversed 97% of steps). **Fix: no backward body motion**
+     (a circular robot can always spin free, so reversing is never needed).
+  2. *Freezing.* A wall-contact penalty of 0.2 made "stop when unsure" optimal once mazes entered the
+     curriculum (grinding = −0.21/step vs standing still = −0.01/step); validation collapsed 0.76 → 0.50.
+     **Fix: contact penalty back to 0.05.** Result: 0.76 → 0.80 → 0.82 at 1/2/3M steps.
+  3. **Exploration-noise cap** annealed 0.6 → 0.1 over 6M steps, so the shipped deterministic policy
+     can't rely on noise to escape dead-bands. (Didn't fix 2 on its own; kept as a safeguard.)
 - **2026-10-04 — MIT license** (code); mascot art excluded. Python env = uv venv in `.venv/`.

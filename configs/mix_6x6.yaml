@@ -18,6 +18,10 @@ ppo:
   ent_coef: 0.0
   max_grad_norm: 0.5
   log_std_init: -0.5
+std_schedule:            # cap exploration noise so the deterministic (shipped) policy can't rely on it
+  start: 0.6
+  end: 0.1
+  steps: 6000000
 reward: {}              # defaults in mazebot/env.py RewardParams
 curriculum:
   threshold: 0.8        # advance when rolling success over `window` episodes >= threshold

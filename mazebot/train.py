@@ -36,6 +36,35 @@ def make_env(rank: int, seed: int, stage: dict, reward: dict):
     return _init
 
 
+def std_schedule_callback(start: float, end: float, steps: int):
+    """Cap the policy's exploration std, annealed linearly from `start` to `end` over `steps`.
+
+    The shipped policy is deterministic (the Gaussian mean). With large training noise PPO learns a
+    mean that only works *because* of the noise (e.g. freezing in a dead-band that noise jiggles out
+    of). Shrinking the noise forces the mean itself to drive well.
+    """
+    import math
+
+    import torch
+    from stable_baselines3.common.callbacks import BaseCallback
+
+    class StdSchedule(BaseCallback):
+        def _cap(self):
+            frac = min(1.0, self.num_timesteps / steps)
+            cap = math.log(start + frac * (end - start))
+            with torch.no_grad():
+                self.model.policy.log_std.clamp_(max=cap)
+            self.logger.record("train/std_cap", math.exp(cap))
+
+        def _on_rollout_start(self):
+            self._cap()
+
+        def _on_step(self):
+            return True
+
+    return StdSchedule()
+
+
 def curriculum_callback(stages, threshold, window, min_steps, max_steps, log_every=50_000):
     from stable_baselines3.common.callbacks import BaseCallback
 
@@ -205,9 +234,14 @@ def train(cfg: dict, name: str):
         workers=v.get("workers", 14),
     )
 
+    callbacks = [curriculum, validation, ckpt]
+    if "std_schedule" in cfg:
+        sc = cfg["std_schedule"]
+        callbacks.append(std_schedule_callback(sc["start"], sc["end"], sc["steps"]))
+
     t0 = time.perf_counter()
     model.learn(
-        cfg["total_steps"], callback=[curriculum, validation, ckpt], tb_log_name="ppo", progress_bar=False
+        cfg["total_steps"], callback=callbacks, tb_log_name="ppo", progress_bar=False
     )
     secs = time.perf_counter() - t0
     model.save(out / "model")
