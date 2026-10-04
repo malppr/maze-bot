@@ -1,6 +1,6 @@
-# Memory 12-12 + privileged critic incl. shortest-path direction rel. to heading.
+# Memory 12-12-4 + privileged critic incl. shortest-path direction rel. to heading.
 seed: 0
-hidden: [12, 12]
+hidden: [12, 12, 4]
 value_hidden: [64, 64]
 critic_extras: true
 critic_path_dir: true

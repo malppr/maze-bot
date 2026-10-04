@@ -1,6 +1,6 @@
-# Memory 12-12 + privileged critic (path distance, 8 all-round rays, time left).
+# Memory 12-12-4 + privileged critic (path distance, 8 all-round rays, time left).
 seed: 0
-hidden: [12, 12]
+hidden: [12, 12, 4]
 value_hidden: [64, 64]
 critic_extras: true
 sim:
