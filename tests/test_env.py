@@ -85,3 +85,20 @@ def test_previous_action_memory_inputs():
     obs, *_ = env.step([0.5, -2.0])  # clipped to [-1, 1]
     assert obs[8:].tolist() == [0.5, -1.0]
     check_env(MazeEnv(sim=SimParams(prev_action_inputs=True)), skip_render_check=True)
+
+
+def test_reverse_penalty_only_when_reversing_allowed_and_commanded():
+    from mazebot.env import RewardParams
+    from mazebot.sim import SimParams
+
+    m = open_map(start=(5.0, 3.0, 0.0))
+    env = MazeEnv(maps=[m], sim=SimParams(reverse_max=1.0), reward=RewardParams(reverse=0.1))
+    env.reset(seed=0)
+    x0 = env.x
+    _, r_back, *_ = env.step([-1.0, -1.0])
+    assert env.x < x0  # actually moved backwards
+    env.reset(seed=0)
+    _, r_spin, *_ = env.step([1.0, -1.0])
+    # spinning in place: no reverse penalty; full reverse: 0.1 penalty (+ negative progress)
+    assert r_spin == pytest.approx(-env.rew.time, abs=1e-3)
+    assert r_back < r_spin - 0.1 + 1e-9

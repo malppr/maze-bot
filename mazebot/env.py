@@ -18,6 +18,7 @@ class RewardParams:
     progress: float = 1.0  # per world unit of geodesic progress
     contact: float = 0.05  # per policy step in wall contact (0.2 taught it to freeze; see PLAN.md)
     time: float = 0.01  # per policy step
+    reverse: float = 0.0  # per step x commanded backward speed in [0, 1] (needs reverse_max > 0)
     goal: float = 10.0  # on reaching B
     timeout_factor: float = 3.0  # time limit = factor * (geodesic A->B / v_max) + slack
     timeout_slack: float = 10.0  # seconds
@@ -119,6 +120,7 @@ class MazeEnv(gym.Env):
             geo = self.geo
         r = self.rew
         reward = r.progress * (self.geo - geo) - r.time - (r.contact if contact else 0.0)
+        reward -= r.reverse * max(0.0, -0.5 * (ul + ur))
         if success:
             reward += r.goal
         self.geo = geo
