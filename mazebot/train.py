@@ -24,12 +24,20 @@ from .sim import SimParams
 RUNS = Path("artifacts/runs")
 
 
-def make_env(rank: int, seed: int, stage: dict, reward: dict, sim: dict | None = None):
+def make_env(
+    rank: int, seed: int, stage: dict, reward: dict, sim: dict | None = None, critic_extras: bool = False
+):
     def _init():
         from stable_baselines3.common.monitor import Monitor
 
         cats, w = zip(*stage.items(), strict=True)
-        env = MazeEnv(categories=cats, weights=w, reward=RewardParams(**reward), sim=SimParams.from_dict(sim))
+        env = MazeEnv(
+            categories=cats,
+            weights=w,
+            reward=RewardParams(**reward),
+            sim=SimParams.from_dict(sim),
+            critic_extras=critic_extras,
+        )
         env.reset(seed=seed * 1000 + rank)
         return Monitor(env, info_keywords=("success", "category"))
 
@@ -211,8 +219,10 @@ def train(cfg: dict, name: str):
         assert not unknown, f"unknown categories {unknown}"
     reward = cfg.get("reward", {})
     start_stage = cur.get("start_stage", 0)
+    extras = bool(cfg.get("critic_extras", False))
     fns = [
-        make_env(i, cfg["seed"], stages[start_stage], reward, cfg.get("sim")) for i in range(cfg["n_envs"])
+        make_env(i, cfg["seed"], stages[start_stage], reward, cfg.get("sim"), extras)
+        for i in range(cfg["n_envs"])
     ]
     venv = BatchedSubprocVecEnv(fns, cfg.get("n_workers", 12))
 
@@ -221,14 +231,21 @@ def train(cfg: dict, name: str):
     if cfg.get("resume_from"):  # continue an earlier run's model (weights, optimizer state, step counter)
         model = PPO.load(cfg["resume_from"], env=venv, device="cpu", tensorboard_log=str(out / "tb"))
     else:
+        policy_kwargs = dict(
+            net_arch=dict(pi=list(cfg["hidden"]), vf=list(cfg.get("value_hidden", [64, 64]))),
+            activation_fn=torch.nn.Tanh,
+            log_std_init=log_std_init,
+        )
+        policy_cls = "MlpPolicy"
+        if extras:  # asymmetric actor-critic: critic also sees privileged, training-only inputs
+            from .privileged import PrivilegedCriticPolicy
+
+            policy_cls = PrivilegedCriticPolicy
+            policy_kwargs["n_actor_obs"] = SimParams.from_dict(cfg.get("sim")).obs_dim
         model = PPO(
-            "MlpPolicy",
+            policy_cls,
             venv,
-            policy_kwargs=dict(
-                net_arch=dict(pi=list(cfg["hidden"]), vf=list(cfg.get("value_hidden", [64, 64]))),
-                activation_fn=torch.nn.Tanh,
-                log_std_init=log_std_init,
-            ),
+            policy_kwargs=policy_kwargs,
             seed=cfg["seed"],
             device="cpu",
             tensorboard_log=str(out / "tb"),

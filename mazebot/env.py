@@ -9,8 +9,10 @@ from dataclasses import dataclass
 import gymnasium as gym
 import numpy as np
 
-from . import mapgen
+from . import geometry, mapgen
 from .sim import SimParams, goal_distance, observe, physics_step
+
+N_CRITIC_EXTRAS = 10
 
 
 @dataclass(frozen=True)
@@ -42,15 +44,21 @@ class MazeEnv(gym.Env):
         reward: RewardParams | None = None,
         map_fn: Callable[[np.random.Generator], mapgen.Map] | None = None,
         render_mode: str | None = None,
+        critic_extras: bool = False,
     ):
         self.sim = sim or SimParams()
         self.rew = reward or RewardParams()
         self.render_mode = render_mode
+        # Training-only privileged inputs for the critic, appended after the actor's inputs. The actor never
+        # sees them (see mazebot/privileged.py); evaluation and export use critic_extras=False.
+        self.critic_extras = critic_extras
+        self.n_actor_obs = self.sim.obs_dim
         self.set_categories(categories, weights)
         self.maps = list(maps) if maps is not None else None
         self.map_fn = map_fn
         self._map_idx = 0
-        self.observation_space = gym.spaces.Box(-1.0, 1.0, shape=(self.sim.obs_dim,), dtype=np.float32)
+        n_obs = self.sim.obs_dim + (N_CRITIC_EXTRAS if critic_extras else 0)
+        self.observation_space = gym.spaces.Box(-1.0, 1.0, shape=(n_obs,), dtype=np.float32)
         self.action_space = gym.spaces.Box(-1.0, 1.0, shape=(2,), dtype=np.float32)
         self.map: mapgen.Map | None = None
 
@@ -95,7 +103,7 @@ class MazeEnv(gym.Env):
         self.path_len = 0.0
         self.prev_action = np.zeros(2)
         obs, self.rays = observe(self.x, self.y, self.th, self.gx, self.gy, self.caps, self.sim)
-        obs = self._with_memory(obs)
+        obs = self._with_extras(self._with_memory(obs))
         return obs.astype(np.float32), self._info(success=False)
 
     def step(self, action):
@@ -128,9 +136,26 @@ class MazeEnv(gym.Env):
 
         self.prev_action = np.array([ul, ur])
         obs, self.rays = observe(self.x, self.y, self.th, self.gx, self.gy, self.caps, p)
-        obs = self._with_memory(obs)
+        obs = self._with_extras(self._with_memory(obs))
         truncated = (not success) and self.steps >= self.max_steps
         return obs.astype(np.float32), float(reward), success, truncated, self._info(success, contact)
+
+    def _with_extras(self, obs: np.ndarray) -> np.ndarray:
+        """Privileged critic inputs: shortest-path distance to B, 8 all-round rays, fraction of time left.
+
+        (Deliberately no shortest-path *direction*: the critic should judge how good a situation is,
+        not be handed the route.)
+        """
+        if not self.critic_extras:
+            return obs
+        th = self.th
+        dirs = np.array([[math.cos(th + k * math.pi / 4), math.sin(th + k * math.pi / 4)] for k in range(8)])
+        rays = geometry.cast_rays(self.x, self.y, dirs, self.caps, self.sim.ray_range) / self.sim.ray_range
+        extras = np.empty(N_CRITIC_EXTRAS)
+        extras[0] = min(self.geo / 20.0, 1.0) if math.isfinite(self.geo) else 1.0
+        extras[1:9] = rays
+        extras[9] = 1.0 - self.steps / self.max_steps
+        return np.concatenate([obs, extras])
 
     def _with_memory(self, obs: np.ndarray) -> np.ndarray:
         if self.sim.prev_action_inputs:
