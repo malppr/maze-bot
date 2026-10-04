@@ -9,6 +9,14 @@ The demo is titled **"Wheely's maze"**; the repo/package keeps the name `maze-bo
 
 ---
 
+## 0. Status (2026-10-05)
+
+- **M0, M1 done. M2 nearly done**: ~25 training runs; results and failure analysis in §11. Best policies
+  (`artifacts/runs/mix_fwd5mem_12x12x4_s0`, `..._12x12_pcrit_s0`) match/beat the hand-coded reactive baseline in
+  6 of 7 test categories; mazes plateau at ~57-60% vs 69%. Remaining M2 work: pick the final policy with 2 more seeds
+  per candidate (validation 300 maps/category), rollout GIFs, Bryan's sign-off.
+- Then: Part 4 planning (PushT, robot-arm page, AI side project), M3 TS port.
+
 ## 1. What the visitor experiences (Playground → "Wheely's maze")
 
 - **Presets** mode: a handful of hand-designed layouts (open field, posts, corridor, zig-zag, small maze, a trap)
@@ -42,15 +50,17 @@ No roaming mascot elsewhere on the site (decided 2026-10-04) — the Playground 
 - **Rays:** 5 rays at −60°, −30°, 0°, 30°, 60° from the heading, max range `R = 3`. Analytic ray–capsule intersection,
   brute force over all capsules (strokes are simplified, so N stays in the low hundreds; a spatial hash only if profiling asks for it).
 
-### Observation (8 inputs)
+### Observation (10 inputs — current leading design; originally 8)
 
 | # | Input | Range |
 |---|---|---|
-| 0–4 | ray distance / R | [0, 1] |
+| 0–4 | ray distance / R (rays at −60°, −30°, 0°, +30°, +60°) | [0, 1] |
 | 5–6 | sin, cos of goal bearing relative to heading | [−1, 1] |
 | 7 | goal distance / 10, clipped | [0, 1] |
+| 8–9 | previous left / right wheel command ("memory") | [−1, 1] |
 
-No observation normalization wrapper (inputs are already scaled), so exported weights need no extra statistics.
+Configurable in `SimParams` (saved with the weights): `ray_angles_deg`, `goal_inputs` (`sincos_dist` | `sincos` | `bearing`),
+`prev_action_inputs`, `reverse_max`. No observation normalization wrapper, so exported weights need no extra statistics.
 
 ### Action (2 outputs)
 
@@ -59,9 +69,10 @@ Per-wheel sign is free (spin in place), but **body speed is floored at 0 — no 
 
 ### Network
 
-MLP **8 → 6 → 6 → 2**, tanh hidden layers, 110 parameters — small enough to draw every weight and neuron.
-Hidden width stays a config value: if 6-6 clearly can't learn freehand maps, compare with 8-8 and a 64-64 upper bound in M2
-and decide together (readability of the network panel matters).
+Leading candidate: **10 → 12 → 12 → 4 → 2**, tanh hidden layers (~350 parameters) — every neuron still drawable, and the
+4-neuron layer before the wheels reads well in the network panel. Final choice between the two best variants
+(plain, or trained with a privileged critic — same shipped actor) pending a multi-seed comparison (§0, §11).
+Original design was 8 → 6 → 6 → 2 (110 parameters); a GRU actor (`recurrent.py`) was tried and did not help.
 
 ## 3. Freehand walls without grid snapping
 
@@ -120,13 +131,14 @@ and decide together (readability of the network panel matters).
 maze-bot/
   pyproject.toml            # uv-managed; deps: numpy, gymnasium; groups: dev (pytest, ruff, matplotlib), train (torch cpu, sb3, tensorboard)
   mazebot/
-    geometry.py  sim.py  env.py  distance_field.py  mapgen.py  render.py
-    train.py  evaluate.py  export.py  baselines.py
+    geometry.py  sim.py  env.py  distance_field.py  mapgen.py  render.py   # sim + env (ported to TS in M3)
+    train.py  vec.py  evaluate.py  baselines.py                             # PPO, batched vec env, test set, baselines
+    policy.py (MLP export/load)  recurrent.py (GRU)  privileged.py (critic-only inputs)
   presets/                  # demo preset layouts (JSON), shared by Python and TS
-  scripts/                  # make_presets.py, render_samples.py, bench_env.py
-  tests/                    # geometry, rays, collision, kinematics, distance field, mapgen, env/reward
-  configs/                  # training configs (yaml)
-  artifacts/                # exported weights (per release), eval reports, sample renders
+  scripts/                  # make_presets, render_samples, bench_env, progress, rollouts, analyze_mazes
+  tests/                    # geometry, sim, distance field, mapgen, env/reward, export parity, privileged, GRU
+  configs/                  # one yaml per experiment (see PLAN §11 for results)
+  artifacts/                # runs/<run>/ (config, weights, validation, eval reports), eval/ (baselines), samples/
   package.json              # npm entry at repo root (npm git deps need it there): exports "maze-bot/web"
   web/
     src/sim/                # TS port
@@ -223,6 +235,9 @@ Each milestone ends with a check run by Claude (tests, metrics, screenshots) and
   - Maze failure analysis: the learned policy matches the baseline on short/direct mazes but collapses with
     path turns (6-8 turns: 3-5% vs 44%); 84% of failures occur in the first quarter of the path ("ping-pong"
     in corridors leading away from B). The policy goal-seeks well but will not commit to long detours.
+  - Also no gain: speed bonus on reaching B (+10 always, up to +5 for finishing early; mazes 57.0%, traps 48.6%,
+    ~0.2 s faster) and longer horizon γ = 0.995 (mazes 53.3%, winding mazes unchanged). Trap success varies
+    32-76% across similar runs — treat single-seed trap numbers with caution.
   - Validation with 100 maps/category is noisy; best-checkpoint selection inflates validation scores (GRU:
     val mazes 0.60 vs test 0.547). Use larger validation sets for final comparisons.
 - **2026-10-04 — MIT license** (code); mascot art excluded. Python env = uv venv in `.venv/`.
