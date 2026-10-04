@@ -77,3 +77,26 @@ def test_numpy_gru_matches_sb3_over_a_sequence_with_reset(tmp_path):
     pol.reset()
     for o in obs_seq[:15]:
         assert np.array_equal(loaded(o), pol(o))
+
+
+def test_fast_sequence_path_matches_sb3_loop():
+    from sb3_contrib.common.recurrent.policies import RecurrentActorCriticPolicy
+
+    from mazebot.recurrent import fast_process_sequence, make_gru_as_lstm
+
+    torch.manual_seed(0)
+    gru = make_gru_as_lstm(10, 8)
+    n_seq, T = 6, 20
+    feats = torch.randn(n_seq * T, 10)
+    h0 = (torch.randn(1, n_seq, 8), torch.zeros(1, n_seq, 8))
+    starts = torch.zeros(n_seq, T)
+    starts[[0, 3], 0] = 1.0  # some sequences begin a new episode (training case)
+    flat = starts.reshape(-1)
+    ref, ref_h = RecurrentActorCriticPolicy._process_sequence(feats, h0, flat, gru)
+    out, h = fast_process_sequence(feats, h0, flat, gru)
+    assert torch.allclose(out, ref, atol=1e-6) and torch.allclose(h[0], ref_h[0], atol=1e-6)
+    starts[2, 7] = 1.0  # a start mid-sequence must fall back to the exact loop
+    flat = starts.reshape(-1)
+    ref, _ = RecurrentActorCriticPolicy._process_sequence(feats, h0, flat, gru)
+    out, _ = fast_process_sequence(feats, h0, flat, gru)
+    assert torch.allclose(out, ref, atol=1e-6)

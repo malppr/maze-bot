@@ -60,6 +60,28 @@ def install_gru(model) -> None:
         if lstm is not None:
             setattr(pol, name, make_gru_as_lstm(lstm.input_size, lstm.hidden_size).to(pol.device))
     pol.optimizer = pol.optimizer_class(pol.parameters(), lr=model.lr_schedule(1), **pol.optimizer_kwargs)
+    pol._process_sequence = fast_process_sequence  # instance attribute shadows the staticmethod
+
+
+def fast_process_sequence(features, lstm_states, episode_starts, lstm):
+    """Drop-in for RecurrentActorCriticPolicy._process_sequence.
+
+    sb3-contrib falls back to a per-timestep Python loop whenever any episode starts inside the batch.
+    In training, sequences are already split at episode boundaries, so starts only ever occur at a
+    sequence's first step: then we zero those sequences' initial state and run the fused GRU over the
+    whole sequence in one call. Anything else (starts mid-sequence) uses the original loop.
+    """
+    torch, _ = _torch()
+    from sb3_contrib.common.recurrent.policies import RecurrentActorCriticPolicy
+
+    n_seq = lstm_states[0].shape[1]
+    seq = features.reshape((n_seq, -1, lstm.input_size)).swapaxes(0, 1)  # (T, n_seq, F)
+    starts = episode_starts.reshape((n_seq, -1)).swapaxes(0, 1)  # (T, n_seq)
+    if starts.shape[0] > 1 and torch.any(starts[1:] != 0.0):
+        return RecurrentActorCriticPolicy._process_sequence(features, lstm_states, episode_starts, lstm)
+    keep = (1.0 - starts[0]).view(1, n_seq, 1)
+    out, states = lstm(seq, (keep * lstm_states[0], keep * lstm_states[1]))
+    return torch.flatten(out.transpose(0, 1), start_dim=0, end_dim=1), states
 
 
 # --------------------------------------------------------------------------- shipped actor (NumPy)
