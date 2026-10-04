@@ -17,6 +17,38 @@ from .sim import SimParams
 WEIGHTS_VERSION = 1
 
 
+def obs_spec(sim: SimParams) -> list[str]:
+    """Human-readable names of the observation entries, in order."""
+    return (
+        [f"ray{i + 1}/R" for i in range(len(sim.ray_angles))]
+        + {
+            "sincos_dist": ["sin(goal bearing)", "cos(goal bearing)", "goal distance / scale"],
+            "sincos": ["sin(goal bearing)", "cos(goal bearing)"],
+            "bearing": ["goal bearing / pi"],
+        }[sim.goal_inputs]
+        + (["previous left wheel", "previous right wheel"] if sim.prev_action_inputs else [])
+    )
+
+
+def load_policy(path: str | Path):
+    """Load exported weights of either kind: plain MLP or GRU (stateful; reset() per episode)."""
+    d = json.loads(Path(path).read_text(encoding="utf-8"))
+    if d.get("type") == "gru":
+        from .recurrent import GRUPolicy
+
+        return GRUPolicy.from_json(d)
+    return MLPPolicy.load(path)
+
+
+def export_actor(model):
+    """Exported actor of an SB3 model: GRUPolicy for RecurrentPPO, MLPPolicy otherwise."""
+    if hasattr(model.policy, "lstm_actor"):
+        from .recurrent import GRUPolicy
+
+        return GRUPolicy.from_sb3(model)
+    return MLPPolicy.from_sb3(model)
+
+
 @dataclass
 class MLPPolicy:
     W: list[np.ndarray]  # W[k]: (out, in)
@@ -60,13 +92,7 @@ class MLPPolicy:
             "arch": self.arch,
             "hidden_activation": "tanh",
             "output": "clip",
-            "obs_spec": [f"ray{i + 1}/R" for i in range(len(sim.ray_angles))]
-            + {
-                "sincos_dist": ["sin(goal bearing)", "cos(goal bearing)", "goal distance / scale"],
-                "sincos": ["sin(goal bearing)", "cos(goal bearing)"],
-                "bearing": ["goal bearing / pi"],
-            }[sim.goal_inputs]
-            + (["previous left wheel", "previous right wheel"] if sim.prev_action_inputs else []),
+            "obs_spec": obs_spec(sim),
             "act_spec": ["left wheel", "right wheel"],
             "sim_params": sim.to_dict(),
             "W": [w.tolist() for w in self.W],

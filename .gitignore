@@ -20,3 +20,4 @@ artifacts/logs/
 artifacts/runs/*/val/
 artifacts/runs/*/rollouts/*.gif
 artifacts/eval/*/episodes.jsonl
+.venv-gpu/

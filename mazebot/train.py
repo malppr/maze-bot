@@ -18,7 +18,7 @@ import yaml
 
 from . import mapgen
 from .env import MazeEnv, RewardParams
-from .policy import MLPPolicy
+from .policy import export_actor
 from .sim import SimParams
 
 RUNS = Path("artifacts/runs")
@@ -169,7 +169,7 @@ def validation_callback(
             final = curriculum.stage == len(curriculum_stages) - 1
             path = out / "val" / f"step_{self.num_timesteps:09d}.json"
             path.parent.mkdir(exist_ok=True)
-            policy = MLPPolicy.from_sb3(self.model)
+            policy = export_actor(self.model)
             policy.save(path, sim_params, {"step": self.num_timesteps})
             report, _ = evaluate(str(path), n, mapgen.TRAIN_CATEGORIES, workers, seed=VAL_SEED)
             per_cat = {c: r["success"] for c, r in report["categories"].items()}
@@ -257,16 +257,40 @@ def train(cfg: dict, name: str):
 
             policy_cls = PrivilegedCriticPolicy
             policy_kwargs["n_actor_obs"] = SimParams.from_dict(cfg.get("sim")).obs_dim
-        model = PPO(
-            policy_cls,
-            venv,
-            policy_kwargs=policy_kwargs,
-            seed=cfg["seed"],
-            device="cpu",
-            tensorboard_log=str(out / "tb"),
-            verbose=0,
-            **ppo,
-        )
+        rec = cfg.get("recurrent")
+        device = cfg.get("device", "cpu")
+        if rec:  # recurrent actor: obs -> GRU(hidden) -> head `hidden` layers -> wheels (sb3-contrib)
+            from sb3_contrib import RecurrentPPO
+
+            from .recurrent import install_gru
+
+            assert not extras, "privileged critic + recurrent actor not supported"
+            policy_kwargs.update(
+                lstm_hidden_size=rec["hidden"], n_lstm_layers=1, shared_lstm=False, enable_critic_lstm=True
+            )
+            model = RecurrentPPO(
+                "MlpLstmPolicy",
+                venv,
+                policy_kwargs=policy_kwargs,
+                seed=cfg["seed"],
+                device=device,
+                tensorboard_log=str(out / "tb"),
+                verbose=0,
+                **ppo,
+            )
+            if rec.get("type", "gru") == "gru":
+                install_gru(model)
+        else:
+            model = PPO(
+                policy_cls,
+                venv,
+                policy_kwargs=policy_kwargs,
+                seed=cfg["seed"],
+                device=device,
+                tensorboard_log=str(out / "tb"),
+                verbose=0,
+                **ppo,
+            )
     curriculum = curriculum_callback(
         stages,
         cur["threshold"],
@@ -307,7 +331,7 @@ def train(cfg: dict, name: str):
     venv.close()
 
     # weights.json = best validation checkpoint (what gets evaluated and shipped); weights_last.json = final
-    last = MLPPolicy.from_sb3(model)
+    last = export_actor(model)
     meta = {
         "run": name,
         "steps_budget": cfg["total_steps"],

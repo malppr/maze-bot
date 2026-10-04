@@ -36,7 +36,7 @@ def eval_map(category: str, i: int, seed: int = EVAL_SEED) -> mapgen.Map:
 
 def make_policy(spec: str, seed: int = 0):
     from .baselines import RandomPolicy, ReactivePolicy
-    from .policy import MLPPolicy
+    from .policy import load_policy
 
     if spec == "random":
         return RandomPolicy(seed)
@@ -44,14 +44,14 @@ def make_policy(spec: str, seed: int = 0):
         return ReactivePolicy()
     if "@noise=" in spec:  # e.g. weights.json@noise=0.3: Gaussian action noise like during training
         path, sigma = spec.split("@noise=")
-        mlp, rng, sigma = MLPPolicy.load(path), np.random.default_rng(seed), float(sigma)
+        mlp, rng, sigma = load_policy(path), np.random.default_rng(seed), float(sigma)
 
         def noisy(obs):
             return np.clip(mlp(obs) + rng.normal(0.0, sigma, 2), -1.0, 1.0)
 
         noisy.sim = mlp.sim
         return noisy
-    return MLPPolicy.load(spec)
+    return load_policy(spec)
 
 
 def classify_failure(xs, ys, geos, contacts, window: int) -> str:
@@ -75,6 +75,8 @@ def classify_failure(xs, ys, geos, contacts, window: int) -> str:
 def run_episode(policy, m: mapgen.Map, record: bool = False) -> dict:
     env = MazeEnv(maps=[m], sim=getattr(policy, "sim", None))  # the policy's own sensor layout
     obs, info = env.reset(seed=0, options={"map": m})
+    if hasattr(policy, "reset"):  # recurrent policies start each episode with empty memory
+        policy.reset()
     xs, ys, geos, contacts = [env.x], [env.y], [env.geo], [False]
     acts = []
     reversing = 0

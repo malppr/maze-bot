@@ -1,0 +1,3 @@
+{"step": 1000032, "stage": 1, "score": 0.7539999999999999, "open": 1.0, "obstacles": 0.94, "scribbles": 0.78, "mazes": 0.32, "mixed": 0.73}
+{"step": 2000064, "stage": 3, "score": 0.792, "open": 0.91, "obstacles": 0.97, "scribbles": 0.84, "mazes": 0.45, "mixed": 0.79}
+{"step": 3000096, "stage": 3, "score": 0.82, "open": 1.0, "obstacles": 0.95, "scribbles": 0.85, "mazes": 0.5, "mixed": 0.8}
