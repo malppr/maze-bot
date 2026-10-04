@@ -11,11 +11,13 @@ The demo is titled **"Wheely's maze"**; the repo/package keeps the name `maze-bo
 
 ## 0. Status (2026-10-05)
 
-- **M0, M1 done. M2 nearly done**: ~25 training runs; results and failure analysis in §11. Best policies
-  (`artifacts/runs/mix_fwd5mem_12x12x4_s0`, `..._12x12_pcrit_s0`) match/beat the hand-coded reactive baseline in
-  6 of 7 test categories; mazes plateau at ~57-60% vs 69%. Remaining M2 work: pick the final policy with 2 more seeds
-  per candidate (validation 300 maps/category), rollout GIFs, Bryan's sign-off.
-- Then: Part 4 planning (PushT, robot-arm page, AI side project), M3 TS port.
+- **M0, M1, M2 done.** ~27 training runs; every experiment and result in §11.
+- **Final policy: `artifacts/release/`** — `weights.json` (actor 10 → 12 → 12 → 4 → 2, memory inputs; from run
+  `mix_fwd5mem_12x12_pcrit_s0`), preset GIFs, figures, test report, and the **sim/obs spec the TS port must match**
+  (`artifacts/release/README.md`). Test set: matches/beats the hand-coded baseline in 6 of 7 categories; mazes
+  59.7% vs 68.6%. Reaches B on 5 of 6 presets; loops in "The trap" (intended demo moment).
+- **Next: web wiring — M3 (TS port + parity), M4 (demo), M5 (package + site), M6 (write-up + project page).**
+  See `HANDOFF.md`. Part 4 planning (PushT, robot-arm page, AI side project) comes after M6.
 
 ## 1. What the visitor experiences (Playground → "Wheely's maze")
 
@@ -175,9 +177,9 @@ Each milestone ends with a check run by Claude (tests, metrics, screenshots) and
 
 | # | Deliverable | Done when |
 |---|---|---|
-| M0 | `uv` project (uv installs Python 3.12), git repo, CI skeleton, CLAUDE.md, README stub | `uv run pytest` + `uv run ruff check` green locally; CI file ready (runs once Bryan pushes) |
-| M1 | Geometry (capsules, rays, collision), kinematics, env, distance field, map generator (all categories + presets), matplotlib renderer | Unit tests + `check_env` pass; rendered sample sheets of every category reviewed; env steps/s measured |
-| M2 | PPO training + curriculum + held-out evaluation + baselines | Per-category held-out success rates, failure taxonomy, rollout GIFs; hidden size decided with Bryan |
+| M0 ✅ | `uv` project (uv installs Python 3.12), git repo, CI skeleton, CLAUDE.md, README stub | `uv run pytest` + `uv run ruff check` green locally; CI file ready (runs once Bryan pushes) |
+| M1 ✅ | Geometry (capsules, rays, collision), kinematics, env, distance field, map generator (all categories + presets), matplotlib renderer | Unit tests + `check_env` pass; rendered sample sheets of every category reviewed; env steps/s measured |
+| M2 ✅ | PPO training + curriculum + held-out evaluation + baselines | Per-category held-out success rates, failure taxonomy, rollout GIFs; hidden size decided with Bryan |
 | M3 | `weights.json` export + TS sim port + parity tests | Parity tests pass locally and in CI |
 | M4 | `mountMazeDemo`: canvas, presets, draw mode, path-check warning, network panel, controls | Works in the dev page; screenshots desktop + 390 px, light + dark, reviewed |
 | M5 | Package release `v0.1.0`; site wiring (`maze.ts`, `IS_PREVIEW = false`, stage layout) | Site `npm run check:all` passes; Bryan reviews `npm run dev` + `npm run preview`; tag ready to push |
@@ -240,4 +242,7 @@ Each milestone ends with a check run by Claude (tests, metrics, screenshots) and
     32-76% across similar runs — treat single-seed trap numbers with caution.
   - Validation with 100 maps/category is noisy; best-checkpoint selection inflates validation scores (GRU:
     val mazes 0.60 vs test 0.547). Use larger validation sets for final comparisons.
+- **2026-10-05 — M2 closed. Final policy = memory 12-12-4 trained with a privileged critic** (best on mazes,
+  presets, mixed; same shipped actor as the plain 12-12-4). Multi-seed comparison skipped (Bryan's call); the
+  write-up should say the pick is from single-seed runs. Release bundle in `artifacts/release/`.
 - **2026-10-04 — MIT license** (code); mascot art excluded. Python env = uv venv in `.venv/`.

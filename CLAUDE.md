@@ -2,7 +2,8 @@
 
 "Wheely's maze": RL navigation for the portfolio's mascot robot. Python (uv) for the env and training,
 TypeScript (`web/`, from M3) for the browser port and demo. Read `PLAN.md` first (design, milestones,
-decisions log — §11 has every experiment and its result).
+decisions log — §11 has every experiment and its result). The shipped policy and the sim spec for the
+TS port are in `artifacts/release/` (README.md there). Next work: web wiring, see `HANDOFF.md`.
 
 ## Environments
 

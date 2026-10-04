@@ -58,8 +58,10 @@ for cat in mapgen.CATEGORIES:
 def gif(m, path, policy, every=2):
     from mazebot.env import MazeEnv
 
-    env = MazeEnv(maps=[m])
+    env = MazeEnv(maps=[m], sim=getattr(policy, "sim", None))  # the policy's own sensor layout
     obs, _ = env.reset(options={"map": m})
+    if hasattr(policy, "reset"):
+        policy.reset()
     frames, xs, ys = [], [env.x], [env.y]
     fig = plt.figure(figsize=(m.width / 2.2, m.height / 2.2), dpi=60)
     k = 0
