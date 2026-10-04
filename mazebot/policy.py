@@ -21,6 +21,7 @@ WEIGHTS_VERSION = 1
 class MLPPolicy:
     W: list[np.ndarray]  # W[k]: (out, in)
     b: list[np.ndarray]
+    sim: SimParams | None = None
 
     @property
     def arch(self) -> list[int]:
@@ -74,4 +75,6 @@ class MLPPolicy:
     @classmethod
     def load(cls, path: str | Path) -> MLPPolicy:
         d = json.loads(Path(path).read_text(encoding="utf-8"))
-        return cls([np.array(w) for w in d["W"]], [np.array(b) for b in d["b"]])
+        pol = cls([np.array(w) for w in d["W"]], [np.array(b) for b in d["b"]])
+        pol.sim = SimParams.from_dict(d.get("sim_params"))  # sensors/kinematics it was trained with
+        return pol

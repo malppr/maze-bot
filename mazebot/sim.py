@@ -36,6 +36,13 @@ class SimParams:
     def obs_dim(self) -> int:
         return len(self.ray_angles) + 3
 
+    @classmethod
+    def from_dict(cls, d: dict | None) -> SimParams:
+        d = dict(d or {})
+        if "ray_angles_deg" in d:
+            d["ray_angles_deg"] = tuple(float(a) for a in d["ray_angles_deg"])
+        return cls(**d)
+
     def to_dict(self) -> dict:
         d = asdict(self)
         d.pop("ray_angles")

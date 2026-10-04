@@ -206,4 +206,10 @@ Each milestone ends with a check run by Claude (tests, metrics, screenshots) and
      **Fix: contact penalty back to 0.05.** Result: 0.76 → 0.80 → 0.82 at 1/2/3M steps.
   3. **Exploration-noise cap** annealed 0.6 → 0.1 over 6M steps, so the shipped deterministic policy
      can't rely on noise to escape dead-bands. (Didn't fix 2 on its own; kept as a safeguard.)
+- **2026-10-05 — M2 target: match or beat the hand-coded reactive baseline** on the test set
+  (1,000 maps/category; "match" = within 2 pts in every category). First 6-6 run: level on open/obstacles/
+  scribbles/mixed, behind on mazes (44% vs 69%), presets (81% vs 94%), traps (18% vs 38%). Bigger nets
+  (8-8, 64-64) did not help ⇒ next: wider vision, 10 inputs (7 rays + goal sin/cos/dist), 12-12 hidden —
+  side view (0, ±30, ±60, ±90°) and 360° view (every ~51°), plus a 5-ray 12-12 control. If that falls
+  short: one more hidden layer (12-12-12).
 - **2026-10-04 — MIT license** (code); mascot art excluded. Python env = uv venv in `.venv/`.

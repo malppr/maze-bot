@@ -45,7 +45,12 @@ def make_policy(spec: str, seed: int = 0):
     if "@noise=" in spec:  # e.g. weights.json@noise=0.3: Gaussian action noise like during training
         path, sigma = spec.split("@noise=")
         mlp, rng, sigma = MLPPolicy.load(path), np.random.default_rng(seed), float(sigma)
-        return lambda obs: np.clip(mlp(obs) + rng.normal(0.0, sigma, 2), -1.0, 1.0)
+
+        def noisy(obs):
+            return np.clip(mlp(obs) + rng.normal(0.0, sigma, 2), -1.0, 1.0)
+
+        noisy.sim = mlp.sim
+        return noisy
     return MLPPolicy.load(spec)
 
 
@@ -68,7 +73,7 @@ def classify_failure(xs, ys, geos, contacts, window: int) -> str:
 
 
 def run_episode(policy, m: mapgen.Map, record: bool = False) -> dict:
-    env = MazeEnv(maps=[m])
+    env = MazeEnv(maps=[m], sim=getattr(policy, "sim", None))  # the policy's own sensor layout
     obs, info = env.reset(seed=0, options={"map": m})
     xs, ys, geos, contacts = [env.x], [env.y], [env.geo], [False]
     acts = []

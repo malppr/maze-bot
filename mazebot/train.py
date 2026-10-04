@@ -24,12 +24,12 @@ from .sim import SimParams
 RUNS = Path("artifacts/runs")
 
 
-def make_env(rank: int, seed: int, stage: dict, reward: dict):
+def make_env(rank: int, seed: int, stage: dict, reward: dict, sim: dict | None = None):
     def _init():
         from stable_baselines3.common.monitor import Monitor
 
         cats, w = zip(*stage.items(), strict=True)
-        env = MazeEnv(categories=cats, weights=w, reward=RewardParams(**reward))
+        env = MazeEnv(categories=cats, weights=w, reward=RewardParams(**reward), sim=SimParams.from_dict(sim))
         env.reset(seed=seed * 1000 + rank)
         return Monitor(env, info_keywords=("success", "category"))
 
@@ -115,7 +115,14 @@ def curriculum_callback(stages, threshold, window, min_steps, max_steps, log_eve
 
 
 def validation_callback(
-    out: Path, curriculum, every: int, n: int, patience: int, min_delta: float, workers: int
+    out: Path,
+    curriculum,
+    every: int,
+    n: int,
+    patience: int,
+    min_delta: float,
+    workers: int,
+    sim_params: SimParams,
 ):
     """Every `every` steps: export the actor, evaluate it on the validation maps (VAL_SEED, never the test
     set), keep the best weights, and stop once the final curriculum stage has plateaued.
@@ -145,7 +152,7 @@ def validation_callback(
             path = out / "val" / f"step_{self.num_timesteps:09d}.json"
             path.parent.mkdir(exist_ok=True)
             policy = MLPPolicy.from_sb3(self.model)
-            policy.save(path, SimParams(), {"step": self.num_timesteps})
+            policy.save(path, sim_params, {"step": self.num_timesteps})
             report, _ = evaluate(str(path), n, mapgen.TRAIN_CATEGORIES, workers, seed=VAL_SEED)
             per_cat = {c: r["success"] for c, r in report["categories"].items()}
             score = float(np.mean(list(per_cat.values())))
@@ -155,7 +162,7 @@ def validation_callback(
             if score > self.best:
                 self.best = score
                 meta = {"step": self.num_timesteps, "val": per_cat}
-                policy.save(out / "weights_best.json", SimParams(), meta)
+                policy.save(out / "weights_best.json", sim_params, meta)
             if final:
                 if score > self.best_final + min_delta:
                     self.best_final = score
@@ -200,7 +207,7 @@ def train(cfg: dict, name: str):
         unknown = set(st) - set(mapgen.CATEGORIES)
         assert not unknown, f"unknown categories {unknown}"
     reward = cfg.get("reward", {})
-    fns = [make_env(i, cfg["seed"], stages[0], reward) for i in range(cfg["n_envs"])]
+    fns = [make_env(i, cfg["seed"], stages[0], reward, cfg.get("sim")) for i in range(cfg["n_envs"])]
     venv = BatchedSubprocVecEnv(fns, cfg.get("n_workers", 12))
 
     ppo = dict(cfg["ppo"])
@@ -232,6 +239,7 @@ def train(cfg: dict, name: str):
         patience=v.get("patience", 4),
         min_delta=v.get("min_delta", 0.01),
         workers=v.get("workers", 14),
+        sim_params=SimParams.from_dict(cfg.get("sim")),
     )
 
     callbacks = [curriculum, validation, ckpt]
@@ -240,9 +248,7 @@ def train(cfg: dict, name: str):
         callbacks.append(std_schedule_callback(sc["start"], sc["end"], sc["steps"]))
 
     t0 = time.perf_counter()
-    model.learn(
-        cfg["total_steps"], callback=callbacks, tb_log_name="ppo", progress_bar=False
-    )
+    model.learn(cfg["total_steps"], callback=callbacks, tb_log_name="ppo", progress_bar=False)
     secs = time.perf_counter() - t0
     model.save(out / "model")
     venv.close()
@@ -259,7 +265,7 @@ def train(cfg: dict, name: str):
         "curriculum": curriculum.history,
         "validation": validation.history,
     }
-    last.save(out / "weights_last.json", SimParams(), meta)
+    last.save(out / "weights_last.json", SimParams.from_dict(cfg.get("sim")), meta)
     best = out / "weights_best.json"
     src = best if best.exists() else out / "weights_last.json"
     (out / "weights.json").write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
