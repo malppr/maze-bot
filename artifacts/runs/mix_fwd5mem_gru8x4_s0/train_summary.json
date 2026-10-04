@@ -1,0 +1,166 @@
+{
+ "run": "mix_fwd5mem_gru8x4_s0",
+ "steps_budget": 30000000,
+ "steps_done": 11000352,
+ "stopped_early": true,
+ "best_val_score": 0.866,
+ "train_seconds": 1709.8921407000162,
+ "curriculum": [
+  {
+   "stage": 0,
+   "step": 0,
+   "mix": {
+    "open": 1.0
+   }
+  },
+  {
+   "stage": 1,
+   "step": 500064,
+   "mix": {
+    "open": 0.3,
+    "obstacles": 0.7
+   }
+  },
+  {
+   "stage": 2,
+   "step": 1000128,
+   "mix": {
+    "open": 0.1,
+    "obstacles": 0.3,
+    "scribbles": 0.6
+   }
+  },
+  {
+   "stage": 3,
+   "step": 1500192,
+   "mix": {
+    "obstacles": 0.2,
+    "scribbles": 0.3,
+    "mazes": 0.5
+   }
+  },
+  {
+   "stage": 4,
+   "step": 6500256,
+   "mix": {
+    "open": 0.05,
+    "obstacles": 0.2,
+    "scribbles": 0.3,
+    "mazes": 0.25,
+    "mixed": 0.2
+   }
+  }
+ ],
+ "validation": [
+  {
+   "step": 1000032,
+   "stage": 1,
+   "score": 0.8100000000000002,
+   "open": 1.0,
+   "obstacles": 0.96,
+   "scribbles": 0.85,
+   "mazes": 0.43,
+   "mixed": 0.81
+  },
+  {
+   "step": 2000064,
+   "stage": 3,
+   "score": 0.8039999999999999,
+   "open": 1.0,
+   "obstacles": 0.97,
+   "scribbles": 0.82,
+   "mazes": 0.38,
+   "mixed": 0.85
+  },
+  {
+   "step": 3000096,
+   "stage": 3,
+   "score": 0.8099999999999999,
+   "open": 0.98,
+   "obstacles": 0.98,
+   "scribbles": 0.83,
+   "mazes": 0.41,
+   "mixed": 0.85
+  },
+  {
+   "step": 4000128,
+   "stage": 3,
+   "score": 0.828,
+   "open": 0.99,
+   "obstacles": 0.97,
+   "scribbles": 0.85,
+   "mazes": 0.48,
+   "mixed": 0.85
+  },
+  {
+   "step": 5000160,
+   "stage": 3,
+   "score": 0.8320000000000001,
+   "open": 0.98,
+   "obstacles": 0.96,
+   "scribbles": 0.86,
+   "mazes": 0.5,
+   "mixed": 0.86
+  },
+  {
+   "step": 6000192,
+   "stage": 3,
+   "score": 0.866,
+   "open": 0.98,
+   "obstacles": 0.97,
+   "scribbles": 0.88,
+   "mazes": 0.6,
+   "mixed": 0.9
+  },
+  {
+   "step": 7000224,
+   "stage": 4,
+   "score": 0.858,
+   "open": 0.99,
+   "obstacles": 0.97,
+   "scribbles": 0.89,
+   "mazes": 0.56,
+   "mixed": 0.88
+  },
+  {
+   "step": 8000256,
+   "stage": 4,
+   "score": 0.8560000000000001,
+   "open": 0.98,
+   "obstacles": 0.97,
+   "scribbles": 0.88,
+   "mazes": 0.56,
+   "mixed": 0.89
+  },
+  {
+   "step": 9000288,
+   "stage": 4,
+   "score": 0.842,
+   "open": 0.97,
+   "obstacles": 0.97,
+   "scribbles": 0.86,
+   "mazes": 0.55,
+   "mixed": 0.86
+  },
+  {
+   "step": 10000320,
+   "stage": 4,
+   "score": 0.85,
+   "open": 0.97,
+   "obstacles": 0.97,
+   "scribbles": 0.87,
+   "mazes": 0.59,
+   "mixed": 0.85
+  },
+  {
+   "step": 11000352,
+   "stage": 4,
+   "score": 0.852,
+   "open": 0.98,
+   "obstacles": 0.97,
+   "scribbles": 0.86,
+   "mazes": 0.6,
+   "mixed": 0.85
+  }
+ ]
+}

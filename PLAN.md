@@ -212,4 +212,17 @@ Each milestone ends with a check run by Claude (tests, metrics, screenshots) and
   (8-8, 64-64) did not help ⇒ next: wider vision, 10 inputs (7 rays + goal sin/cos/dist), 12-12 hidden —
   side view (0, ±30, ±60, ±90°) and 360° view (every ~51°), plus a 5-ray 12-12 control. If that falls
   short: one more hidden layer (12-12-12).
+- **2026-10-05 — M2 experiment round (test set, 1,000 maps/category vs reactive baseline; one seed each):**
+  - Network size/depth with 5 forward rays (6-6, 8-8, 12-12, 12-12-12, 64-64): mazes 43-46%, no gain.
+  - Vision: 360° (7 rays) lifts mazes to 56% and traps to 64%; side-only rays hurt. 360° + memory: no extra gain.
+  - **Memory (previous wheel commands as inputs) is the biggest win**: 12-12 and 12-12-4 match/beat the baseline in
+    6 of 7 categories (traps 56-76% vs 38%; scribbles, obstacles, mixed above baseline); mazes 57-60% vs 69%.
+  - No gain (or worse): 12-12-12, 12-12-8-4, gentle maze curriculum, reversing (+/- penalty; blind reversing
+    returns without one), dropping goal distance or using a single bearing input, privileged critic (distance:
+    level; + path direction: worse), GRU(8) recurrent actor (mazes 54.7%; trained on GPU with a fused-GRU path).
+  - Maze failure analysis: the learned policy matches the baseline on short/direct mazes but collapses with
+    path turns (6-8 turns: 3-5% vs 44%); 84% of failures occur in the first quarter of the path ("ping-pong"
+    in corridors leading away from B). The policy goal-seeks well but will not commit to long detours.
+  - Validation with 100 maps/category is noisy; best-checkpoint selection inflates validation scores (GRU:
+    val mazes 0.60 vs test 0.547). Use larger validation sets for final comparisons.
 - **2026-10-04 — MIT license** (code); mascot art excluded. Python env = uv venv in `.venv/`.
