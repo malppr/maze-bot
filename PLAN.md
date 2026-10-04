@@ -171,8 +171,9 @@ mountMazeDemo(el: HTMLElement, opts?: {
   The site's fixed-aspect `.stage` box will need loosening when the real demo is wired in.
 - Pauses when off-screen or tab hidden; respects reduced motion.
 - `mountMascot` is **dropped** (no roaming mascot in the site hero).
-- Site wiring: `src/demos/maze.ts` re-exports from `maze-bot/web`, `IS_PREVIEW = false`, dependency
-  `"maze-bot": "github:malppr/maze-bot#v0.1.0"`.
+- Site wiring (self-contained, Bryan 2026-10-04): the site keeps a generated copy of the demo build in
+  `src/vendor/maze-bot/`; `npm run sync:site` here rebuilds and copies it (commit stamped in `SOURCE.txt`).
+  `src/demos/maze.ts` re-exports it. No npm dependency or tag needed.
 
 ## 8. Milestones
 
@@ -185,7 +186,7 @@ Each milestone ends with a check run by Claude (tests, metrics, screenshots) and
 | M2 ✅ | PPO training + curriculum + held-out evaluation + baselines | Per-category held-out success rates, failure taxonomy, rollout GIFs; hidden size decided with Bryan |
 | M3 ✅ | `weights.json` export + TS sim port + parity tests | Parity tests pass locally and in CI |
 | M4 ✅ | `mountMazeDemo`: canvas, presets, draw mode, path-check warning, network panel, controls | Works in the dev page; screenshots desktop + 390 px, light + dark, reviewed |
-| M5 | Package release `v0.1.0`; site wiring (`maze.ts`, `IS_PREVIEW = false`, stage layout) | Site `npm run check:all` passes; Bryan reviews `npm run dev` + `npm run preview`; tag ready to push |
+| M5 (in review) | Site wiring: self-contained copy via `npm run sync:site`; `/playground` is the demo | Site `npm run check:all` passes; Bryan reviews `npm run dev` + `npm run preview`; tag ready to push |
 | M6 | Write-up (method, reward design, results, failure modes, GIFs) → README + site project page "Wheely's maze" (tags robot-learning + ai) | Bryan review |
 
 ## 9. Risks
