@@ -24,3 +24,4 @@ artifacts/eval/*/episodes.jsonl
 artifacts/release/versions/*/eval/episodes.jsonl
 .devbuild/
 *.tgz
+web/dist/
