@@ -45,6 +45,7 @@ class MazeEnv(gym.Env):
         map_fn: Callable[[np.random.Generator], mapgen.Map] | None = None,
         render_mode: str | None = None,
         critic_extras: bool = False,
+        critic_path_dir: bool = False,
     ):
         self.sim = sim or SimParams()
         self.rew = reward or RewardParams()
@@ -52,12 +53,14 @@ class MazeEnv(gym.Env):
         # Training-only privileged inputs for the critic, appended after the actor's inputs. The actor never
         # sees them (see mazebot/privileged.py); evaluation and export use critic_extras=False.
         self.critic_extras = critic_extras
+        self.critic_path_dir = critic_extras and critic_path_dir
         self.n_actor_obs = self.sim.obs_dim
         self.set_categories(categories, weights)
         self.maps = list(maps) if maps is not None else None
         self.map_fn = map_fn
         self._map_idx = 0
-        n_obs = self.sim.obs_dim + (N_CRITIC_EXTRAS if critic_extras else 0)
+        n_extra = (N_CRITIC_EXTRAS + (2 if self.critic_path_dir else 0)) if critic_extras else 0
+        n_obs = self.sim.obs_dim + n_extra
         self.observation_space = gym.spaces.Box(-1.0, 1.0, shape=(n_obs,), dtype=np.float32)
         self.action_space = gym.spaces.Box(-1.0, 1.0, shape=(2,), dtype=np.float32)
         self.map: mapgen.Map | None = None
@@ -141,10 +144,8 @@ class MazeEnv(gym.Env):
         return obs.astype(np.float32), float(reward), success, truncated, self._info(success, contact)
 
     def _with_extras(self, obs: np.ndarray) -> np.ndarray:
-        """Privileged critic inputs: shortest-path distance to B, 8 all-round rays, fraction of time left.
-
-        (Deliberately no shortest-path *direction*: the critic should judge how good a situation is,
-        not be handed the route.)
+        """Privileged critic inputs: shortest-path distance to B, 8 all-round rays, fraction of time left,
+        and optionally (critic_path_dir) the shortest-path direction relative to the heading (sin, cos).
         """
         if not self.critic_extras:
             return obs
@@ -155,7 +156,22 @@ class MazeEnv(gym.Env):
         extras[0] = min(self.geo / 20.0, 1.0) if math.isfinite(self.geo) else 1.0
         extras[1:9] = rays
         extras[9] = 1.0 - self.steps / self.max_steps
+        if self.critic_path_dir:
+            extras = np.concatenate([extras, self._path_direction()])
         return np.concatenate([obs, extras])
+
+    def _path_direction(self) -> np.ndarray:
+        """(sin, cos) of the shortest-path direction relative to the heading (downhill on the field)."""
+        m, x, y = self.map, self.x, self.y
+        h = 0.1
+        gx = m.geo(x + h, y) - m.geo(x - h, y)
+        gy = m.geo(x, y + h) - m.geo(x, y - h)
+        n = math.sqrt(gx * gx + gy * gy) if math.isfinite(gx) and math.isfinite(gy) else 0.0
+        if n <= 1e-9:
+            return np.zeros(2)
+        dx, dy = -gx / n, -gy / n
+        hx, hy = math.cos(self.th), math.sin(self.th)
+        return np.array([hx * dy - hy * dx, hx * dx + hy * dy])
 
     def _with_memory(self, obs: np.ndarray) -> np.ndarray:
         if self.sim.prev_action_inputs:

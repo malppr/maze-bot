@@ -65,3 +65,18 @@ def test_export_is_the_plain_actor_and_runs_without_extras():
     env = MazeEnv(sim=SIM)  # evaluation env: no extras
     o, _ = env.reset(seed=0)
     env.step(pol(o))
+
+
+def test_path_direction_extra_points_along_shortest_path():
+    from mazebot import geometry as g
+    from mazebot import mapgen
+
+    # wall between A and B with a gap at the bottom: the shortest path from A first heads down (+y)
+    walls = g.capsules([[5, 0, 5, 4.5, 0.1]])
+    m = mapgen.attach_field(mapgen.Map(10.0, 6.0, walls, (2.0, 2.0, 0.0), (8.0, 2.0), "obstacles"))
+    env = MazeEnv(maps=[m], sim=SIM, critic_extras=True, critic_path_dir=True)
+    obs, _ = env.reset(seed=0, options={"map": m})
+    assert obs.shape == (SIM.obs_dim + N_CRITIC_EXTRAS + 2,)
+    path_sin, path_cos = obs[-2:]
+    assert path_sin > 0.3  # heading +x, route bends towards +y = clockwise = positive sin
+    assert abs(np.hypot(path_sin, path_cos) - 1) < 1e-5

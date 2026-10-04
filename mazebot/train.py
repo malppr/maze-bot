@@ -25,7 +25,13 @@ RUNS = Path("artifacts/runs")
 
 
 def make_env(
-    rank: int, seed: int, stage: dict, reward: dict, sim: dict | None = None, critic_extras: bool = False
+    rank: int,
+    seed: int,
+    stage: dict,
+    reward: dict,
+    sim: dict | None = None,
+    critic_extras: bool = False,
+    critic_path_dir: bool = False,
 ):
     def _init():
         from stable_baselines3.common.monitor import Monitor
@@ -37,6 +43,7 @@ def make_env(
             reward=RewardParams(**reward),
             sim=SimParams.from_dict(sim),
             critic_extras=critic_extras,
+            critic_path_dir=critic_path_dir,
         )
         env.reset(seed=seed * 1000 + rank)
         return Monitor(env, info_keywords=("success", "category"))
@@ -221,7 +228,15 @@ def train(cfg: dict, name: str):
     start_stage = cur.get("start_stage", 0)
     extras = bool(cfg.get("critic_extras", False))
     fns = [
-        make_env(i, cfg["seed"], stages[start_stage], reward, cfg.get("sim"), extras)
+        make_env(
+            i,
+            cfg["seed"],
+            stages[start_stage],
+            reward,
+            cfg.get("sim"),
+            extras,
+            cfg.get("critic_path_dir", False),
+        )
         for i in range(cfg["n_envs"])
     ]
     venv = BatchedSubprocVecEnv(fns, cfg.get("n_workers", 12))
