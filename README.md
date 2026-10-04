@@ -9,17 +9,17 @@ its previous wheel command in; two wheel speeds out, 15 times a second.
 
 ## Results
 
-Success rate (%) on 1,000 held-out layouts per category. By-the-Book is a hand-written controller that sees the
+Success rate (%) on 1,000 held-out layouts per category. By-the-Book is a heuristic policy that sees the
 same inputs.
 
 | | open | obstacles | scribbles | mixed | mazes | traps |
 |---|---|---|---|---|---|---|
-| By-the-Book (hand-written) | 100.0 | 95.6 | 89.7 | 84.6 | **68.6** | 38.4 |
+| By-the-Book (heuristic policy) | 100.0 | 95.6 | 89.7 | 84.6 | **68.6** | 38.4 |
 | Rookie (8 inputs, 8-6-6-2) | 100.0 | 93.9 | 87.2 | 82.4 | 43.6 | 18.2 |
 | Owl Eyes (7 rays all round) | 99.3 | 95.3 | 91.2 | 83.1 | 56.3 | **63.8** |
 | **Wheely** (memory inputs, shipped) | **100.0** | **96.8** | **92.9** | **87.6** | 59.7 | 60.7 |
 
-Matches or beats the hand-written rule in 6 of 7 categories (presets: 94.0 vs 94.1); the gap is winding mazes,
+Matches or beats the heuristic policy in 6 of 7 categories (presets: 94.0 vs 94.1); the gap is winding mazes,
 where it won't commit to long detours away from B. Single seed per configuration. Every run and experiment:
 [PLAN.md §11](PLAN.md), [artifacts/release/](artifacts/release/README.md) (weights, sim spec, test reports,
 maze analysis), [all runs](artifacts/release/all_runs_test_set.md).
