@@ -1,0 +1,75 @@
+{
+ "run": "v4_probe_contact005",
+ "steps_budget": 3100000,
+ "steps_done": 3108864,
+ "stopped_early": false,
+ "best_val_score": 0.8220000000000001,
+ "train_seconds": 320.4998800000176,
+ "curriculum": [
+  {
+   "stage": 0,
+   "step": 0,
+   "mix": {
+    "open": 1.0
+   }
+  },
+  {
+   "stage": 1,
+   "step": 500064,
+   "mix": {
+    "open": 0.3,
+    "obstacles": 0.7
+   }
+  },
+  {
+   "stage": 2,
+   "step": 1000128,
+   "mix": {
+    "open": 0.1,
+    "obstacles": 0.3,
+    "scribbles": 0.6
+   }
+  },
+  {
+   "stage": 3,
+   "step": 1500192,
+   "mix": {
+    "obstacles": 0.2,
+    "scribbles": 0.3,
+    "mazes": 0.5
+   }
+  }
+ ],
+ "validation": [
+  {
+   "step": 1000032,
+   "stage": 1,
+   "score": 0.764,
+   "open": 1.0,
+   "obstacles": 0.93,
+   "scribbles": 0.78,
+   "mazes": 0.32,
+   "mixed": 0.79
+  },
+  {
+   "step": 2000064,
+   "stage": 3,
+   "score": 0.796,
+   "open": 0.99,
+   "obstacles": 0.92,
+   "scribbles": 0.82,
+   "mazes": 0.43,
+   "mixed": 0.82
+  },
+  {
+   "step": 3000096,
+   "stage": 3,
+   "score": 0.8220000000000001,
+   "open": 1.0,
+   "obstacles": 0.94,
+   "scribbles": 0.85,
+   "mazes": 0.48,
+   "mixed": 0.84
+  }
+ ]
+}

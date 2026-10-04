@@ -1,0 +1,16 @@
+{"step": 1000032, "stage": 1, "score": 0.7340000000000001, "open": 1.0, "obstacles": 0.91, "scribbles": 0.79, "mazes": 0.28, "mixed": 0.69}
+{"step": 2000064, "stage": 3, "score": 0.764, "open": 0.98, "obstacles": 0.93, "scribbles": 0.8, "mazes": 0.34, "mixed": 0.77}
+{"step": 3000096, "stage": 3, "score": 0.622, "open": 0.78, "obstacles": 0.7, "scribbles": 0.65, "mazes": 0.33, "mixed": 0.65}
+{"step": 4000128, "stage": 3, "score": 0.668, "open": 0.82, "obstacles": 0.8, "scribbles": 0.7, "mazes": 0.38, "mixed": 0.64}
+{"step": 5000160, "stage": 3, "score": 0.71, "open": 0.84, "obstacles": 0.82, "scribbles": 0.73, "mazes": 0.46, "mixed": 0.7}
+{"step": 6000192, "stage": 3, "score": 0.712, "open": 0.81, "obstacles": 0.83, "scribbles": 0.72, "mazes": 0.47, "mixed": 0.73}
+{"step": 7000224, "stage": 4, "score": 0.728, "open": 0.84, "obstacles": 0.86, "scribbles": 0.73, "mazes": 0.44, "mixed": 0.77}
+{"step": 8000256, "stage": 4, "score": 0.728, "open": 0.84, "obstacles": 0.86, "scribbles": 0.75, "mazes": 0.44, "mixed": 0.75}
+{"step": 9000288, "stage": 4, "score": 0.742, "open": 0.87, "obstacles": 0.87, "scribbles": 0.75, "mazes": 0.44, "mixed": 0.78}
+{"step": 10000320, "stage": 4, "score": 0.744, "open": 0.87, "obstacles": 0.87, "scribbles": 0.74, "mazes": 0.46, "mixed": 0.78}
+{"step": 11000352, "stage": 4, "score": 0.75, "open": 0.88, "obstacles": 0.88, "scribbles": 0.76, "mazes": 0.44, "mixed": 0.79}
+{"step": 12000384, "stage": 4, "score": 0.7539999999999999, "open": 0.87, "obstacles": 0.88, "scribbles": 0.76, "mazes": 0.48, "mixed": 0.78}
+{"step": 13000416, "stage": 4, "score": 0.75, "open": 0.87, "obstacles": 0.88, "scribbles": 0.77, "mazes": 0.44, "mixed": 0.79}
+{"step": 14000448, "stage": 4, "score": 0.758, "open": 0.87, "obstacles": 0.89, "scribbles": 0.77, "mazes": 0.48, "mixed": 0.78}
+{"step": 15000480, "stage": 4, "score": 0.76, "open": 0.87, "obstacles": 0.88, "scribbles": 0.79, "mazes": 0.47, "mixed": 0.79}
+{"step": 16000512, "stage": 4, "score": 0.756, "open": 0.88, "obstacles": 0.89, "scribbles": 0.78, "mazes": 0.45, "mixed": 0.78}

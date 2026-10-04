@@ -6,7 +6,7 @@ __pycache__/
 *.egg-info/
 dist/
 build/
-runs/
+/runs/
 artifacts/tmp/
 node_modules/
 web/dist/
@@ -17,3 +17,6 @@ artifacts/runs/*/model.zip
 artifacts/runs/*/eval/episodes.jsonl
 artifacts/tmp/
 artifacts/logs/
+artifacts/runs/*/val/
+artifacts/runs/*/rollouts/*.gif
+artifacts/eval/*/episodes.jsonl

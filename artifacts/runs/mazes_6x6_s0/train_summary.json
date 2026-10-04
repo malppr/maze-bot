@@ -1,0 +1,86 @@
+{
+ "run": "mazes_6x6_s0",
+ "steps_budget": 30000000,
+ "steps_done": 6000192,
+ "stopped_early": true,
+ "best_val_score": 0.764,
+ "train_seconds": 451.8483144000638,
+ "curriculum": [
+  {
+   "stage": 0,
+   "step": 0,
+   "mix": {
+    "open": 1.0
+   }
+  },
+  {
+   "stage": 1,
+   "step": 500064,
+   "mix": {
+    "mazes": 1.0
+   }
+  }
+ ],
+ "validation": [
+  {
+   "step": 1000032,
+   "stage": 1,
+   "score": 0.6300000000000001,
+   "open": 0.93,
+   "obstacles": 0.7,
+   "scribbles": 0.7,
+   "mazes": 0.2,
+   "mixed": 0.62
+  },
+  {
+   "step": 2000064,
+   "stage": 1,
+   "score": 0.764,
+   "open": 0.88,
+   "obstacles": 0.91,
+   "scribbles": 0.79,
+   "mazes": 0.44,
+   "mixed": 0.8
+  },
+  {
+   "step": 3000096,
+   "stage": 1,
+   "score": 0.752,
+   "open": 0.85,
+   "obstacles": 0.84,
+   "scribbles": 0.79,
+   "mazes": 0.5,
+   "mixed": 0.78
+  },
+  {
+   "step": 4000128,
+   "stage": 1,
+   "score": 0.6940000000000001,
+   "open": 0.66,
+   "obstacles": 0.77,
+   "scribbles": 0.77,
+   "mazes": 0.5,
+   "mixed": 0.77
+  },
+  {
+   "step": 5000160,
+   "stage": 1,
+   "score": 0.688,
+   "open": 0.65,
+   "obstacles": 0.78,
+   "scribbles": 0.78,
+   "mazes": 0.48,
+   "mixed": 0.75
+  },
+  {
+   "step": 6000192,
+   "stage": 1,
+   "score": 0.662,
+   "open": 0.63,
+   "obstacles": 0.7,
+   "scribbles": 0.77,
+   "mazes": 0.48,
+   "mixed": 0.73
+  }
+ ]
+}

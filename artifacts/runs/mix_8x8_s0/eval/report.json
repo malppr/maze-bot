@@ -1,0 +1,127 @@
+{
+ "policy": "artifacts/runs/mix_8x8_s0/weights.json",
+ "n_per_category": 1000,
+ "eval_seed": 20261004,
+ "categories": {
+  "open": {
+   "n": 1000,
+   "success": 0.998,
+   "ci95": [
+    0.9927370411104123,
+    0.9994513678975429
+   ],
+   "spl": 0.9407663337940009,
+   "time_to_goal_s": 5.521910487641951,
+   "contacts_per_ep": 0.004,
+   "reverse_frac": 0.00010031724714921702,
+   "failures": {
+    "stuck": 0.0,
+    "looping": 0.002,
+    "progressing": 0.0
+   }
+  },
+  "obstacles": {
+   "n": 1000,
+   "success": 0.944,
+   "ci95": [
+    0.9279763237468875,
+    0.9566253903083978
+   ],
+   "spl": 0.8761425692850737,
+   "time_to_goal_s": 6.192019774011299,
+   "contacts_per_ep": 11.545,
+   "reverse_frac": 0.0003025911918673226,
+   "failures": {
+    "stuck": 0.021,
+    "looping": 0.032,
+    "progressing": 0.003
+   }
+  },
+  "scribbles": {
+   "n": 1000,
+   "success": 0.892,
+   "ci95": [
+    0.8712406103126095,
+    0.9097591011956604
+   ],
+   "spl": 0.8322995523223937,
+   "time_to_goal_s": 6.034454409566518,
+   "contacts_per_ep": 9.413,
+   "reverse_frac": 0.0009436898326112496,
+   "failures": {
+    "stuck": 0.02,
+    "looping": 0.08,
+    "progressing": 0.008
+   }
+  },
+  "mazes": {
+   "n": 1000,
+   "success": 0.462,
+   "ci95": [
+    0.4313035714780835,
+    0.4929872728144823
+   ],
+   "spl": 0.42758974591161664,
+   "time_to_goal_s": 8.1995670995671,
+   "contacts_per_ep": 44.566,
+   "reverse_frac": 0.0024742991870329066,
+   "failures": {
+    "stuck": 0.064,
+    "looping": 0.443,
+    "progressing": 0.031
+   }
+  },
+  "mixed": {
+   "n": 1000,
+   "success": 0.837,
+   "ci95": [
+    0.8128242949684974,
+    0.8585963753842754
+   ],
+   "spl": 0.7837558154200913,
+   "time_to_goal_s": 6.3999999999999995,
+   "contacts_per_ep": 45.38,
+   "reverse_frac": 0.0004242182243353516,
+   "failures": {
+    "stuck": 0.091,
+    "looping": 0.064,
+    "progressing": 0.008
+   }
+  },
+  "traps": {
+   "n": 1000,
+   "success": 0.347,
+   "ci95": [
+    0.3181324408399647,
+    0.37703859012747076
+   ],
+   "spl": 0.2281181244537956,
+   "time_to_goal_s": 13.35312199807877,
+   "contacts_per_ep": 12.332,
+   "reverse_frac": 0.00013118406646420438,
+   "failures": {
+    "stuck": 0.013,
+    "looping": 0.594,
+    "progressing": 0.046
+   }
+  },
+  "presets": {
+   "n": 1000,
+   "success": 0.862,
+   "ci95": [
+    0.8392335563875687,
+    0.8819957690358847
+   ],
+   "spl": 0.7898064249303225,
+   "time_to_goal_s": 7.517014694508894,
+   "contacts_per_ep": 13.011,
+   "reverse_frac": 0.0002351517362865636,
+   "failures": {
+    "stuck": 0.001,
+    "looping": 0.124,
+    "progressing": 0.013
+   }
+  }
+ },
+ "seconds": 59.46272309985943
+}
