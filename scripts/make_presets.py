@@ -83,5 +83,5 @@ out = {
     "presets": [{"width": W, "height": H, **p} for p in PRESETS],
 }
 path = Path(__file__).resolve().parent.parent / "presets" / "presets.json"
-path.write_text(json.dumps(out, indent=1) + "\n", encoding="utf-8")
+path.write_text(json.dumps(out, indent=1) + "\n", encoding="utf-8", newline="\n")
 print(f"wrote {len(PRESETS)} presets to {path}")
