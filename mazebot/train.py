@@ -262,6 +262,7 @@ def train(cfg: dict, name: str):
         callbacks.append(std_schedule_callback(sc["start"], sc["end"], sc["steps"]))
 
     t0 = time.perf_counter()
+    steps0 = model.num_timesteps
     model.learn(
         cfg["total_steps"],
         callback=callbacks,
@@ -290,7 +291,8 @@ def train(cfg: dict, name: str):
     src = best if best.exists() else out / "weights_last.json"
     (out / "weights.json").write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
     (out / "train_summary.json").write_text(json.dumps(meta, indent=1), encoding="utf-8")
-    print(f"done in {secs / 60:.1f} min ({model.num_timesteps / secs:,.0f} steps/s) -> {out}", flush=True)
+    rate = (model.num_timesteps - steps0) / secs
+    print(f"done in {secs / 60:.1f} min ({rate:,.0f} steps/s) -> {out}", flush=True)
     return out
 
 
