@@ -16,7 +16,8 @@ import numpy as np
 from . import distance_field as dfield
 from . import geometry
 
-CATEGORIES = ("open", "obstacles", "scribbles", "mazes", "mixed", "traps", "presets")
+# New categories go at the END: evaluation seeds are keyed by the category index.
+CATEGORIES = ("open", "obstacles", "scribbles", "mazes", "mixed", "traps", "presets", "mazes_easy")
 TRAIN_CATEGORIES = ("open", "obstacles", "scribbles", "mazes", "mixed")
 PRESETS_PATH = Path(__file__).resolve().parent.parent / "presets" / "presets.json"
 
@@ -212,12 +213,12 @@ def wobble(rng, segs: np.ndarray, rad_lo: float, rad_hi: float, amp: float, piec
     return np.vstack(parts) if parts else geometry.EMPTY.copy()
 
 
-def gen_maze(rng, w, h, braid: float | None = None):
-    cell = rng.uniform(1.1, 1.8)
+def gen_maze(rng, w, h, braid: float | None = None, cell_range=(1.1, 1.8), braid_range=(0.0, 0.2)):
+    cell = rng.uniform(*cell_range)
     nx, ny = max(2, int(w // cell)), max(2, int(h // cell))
     # fit the grid to the arena exactly so outer cells close against the border
     cw, ch = w / nx, h / ny
-    segs = maze_walls(rng, nx, ny, 1.0, braid=braid if braid is not None else rng.uniform(0.0, 0.2))
+    segs = maze_walls(rng, nx, ny, 1.0, braid=braid if braid is not None else rng.uniform(*braid_range))
     segs = segs * np.array([cw, ch, cw, ch])
     return wobble(rng, segs, 0.05, 0.12, amp=rng.uniform(0.0, 0.06))
 
@@ -348,6 +349,8 @@ def sample_map(rng: np.random.Generator, category: str, min_geo: float = 3.0) ->
                 walls = gen_scribbles(rng, w, h)
             elif category == "mazes":
                 walls = gen_maze(rng, w, h)
+            elif category == "mazes_easy":  # curriculum only: wide corridors, more loops
+                walls = gen_maze(rng, w, h, cell_range=(1.8, 2.6), braid_range=(0.2, 0.4))
             elif category == "mixed":
                 walls = gen_mixed(rng, w, h)
             else:  # traps
