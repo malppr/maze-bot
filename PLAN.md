@@ -159,11 +159,14 @@ import { mountMazeDemo } from "maze-bot/web";
 
 mountMazeDemo(el: HTMLElement, opts?: {
   mode?: "obstacles" | "draw";   // "obstacles" = presets mode
-  showNetwork?: boolean;          // neuron panel
+  showNetwork?: boolean;          // neuron panel (default true)
+  version?: string;               // starting Wheely: heuristic | v3-rookie | v4-owl-eyes | final (default)
+  sprite?: string;                // URL of the mascot sprite (site asset, not in this MIT package)
 }): { destroy(): void };
 ```
 
-- Theme: reads `--fg`, `--bg`, `--surface`, `--border`, `--muted`, `--accent` from the container (re-read on theme change). No theme props.
+- Theme: reads `--fg`, `--bg`, `--surface`, `--border`, `--muted`, `--accent`, `--accent-fg`, `--ai` (negative signals), `--radius`,
+  `--font-mono` from the container (re-read on theme change). No theme props.
 - The demo owns its layout inside `el` (arena, controls, network panel; panel moves below the arena on phones).
   The site's fixed-aspect `.stage` box will need loosening when the real demo is wired in.
 - Pauses when off-screen or tab hidden; respects reduced motion.
@@ -180,8 +183,8 @@ Each milestone ends with a check run by Claude (tests, metrics, screenshots) and
 | M0 ✅ | `uv` project (uv installs Python 3.12), git repo, CI skeleton, CLAUDE.md, README stub | `uv run pytest` + `uv run ruff check` green locally; CI file ready (runs once Bryan pushes) |
 | M1 ✅ | Geometry (capsules, rays, collision), kinematics, env, distance field, map generator (all categories + presets), matplotlib renderer | Unit tests + `check_env` pass; rendered sample sheets of every category reviewed; env steps/s measured |
 | M2 ✅ | PPO training + curriculum + held-out evaluation + baselines | Per-category held-out success rates, failure taxonomy, rollout GIFs; hidden size decided with Bryan |
-| M3 | `weights.json` export + TS sim port + parity tests | Parity tests pass locally and in CI |
-| M4 | `mountMazeDemo`: canvas, presets, draw mode, path-check warning, network panel, controls | Works in the dev page; screenshots desktop + 390 px, light + dark, reviewed |
+| M3 ✅ | `weights.json` export + TS sim port + parity tests | Parity tests pass locally and in CI |
+| M4 ✅ | `mountMazeDemo`: canvas, presets, draw mode, path-check warning, network panel, controls | Works in the dev page; screenshots desktop + 390 px, light + dark, reviewed |
 | M5 | Package release `v0.1.0`; site wiring (`maze.ts`, `IS_PREVIEW = false`, stage layout) | Site `npm run check:all` passes; Bryan reviews `npm run dev` + `npm run preview`; tag ready to push |
 | M6 | Write-up (method, reward design, results, failure modes, GIFs) → README + site project page "Wheely's maze" (tags robot-learning + ai) | Bryan review |
 

@@ -158,13 +158,36 @@ export class Episode {
 		this.reset();
 	}
 
+	/**
+	 * Change walls mid-drive (demo drawing): Wheely keeps its pose and memory. With `replan`, the path grid
+	 * is rebuilt and the time limit extended to cover the path from where Wheely is now. Returns whether B
+	 * is reachable from Wheely's position (only meaningful with `replan`).
+	 */
+	updateWalls(walls: number[][], replan: boolean): boolean {
+		this.map = { ...this.map, walls };
+		this.caps = mapCaps(this.map);
+		this.sense();
+		if (!replan) return this.reachable;
+		this.grid = buildGrid(this.map.width, this.map.height, this.caps, this.p.radius);
+		this.field = geodesicField(this.grid, this.map.goal[0], this.map.goal[1]);
+		const geo = lookup(this.grid, this.field, this.pose.x, this.pose.y);
+		this.geo0 = geo;
+		this.maxSteps = Math.max(this.maxSteps === Infinity ? 0 : this.maxSteps, this.steps + this.limitSteps(geo, this.pose));
+		return geo < Infinity;
+	}
+
+	/** Policy steps allowed for a path of length `geo` (no path: straight-line distance, so "lost" still happens). */
+	private limitSteps(geo: number, from: Pose): number {
+		const d = geo < Infinity ? geo : goalDistance(from.x, from.y, this.map.goal[0], this.map.goal[1]);
+		const limitS = (this.timeout.factor * d) / this.p.vMax + this.timeout.slack;
+		return Math.ceil(limitS / (this.p.dt * this.p.frameSkip));
+	}
+
 	reset(): void {
 		const [x, y, th] = this.map.start;
 		this.pose = { x, y, th };
 		this.geo0 = lookup(this.grid, this.field, x, y);
-		const policyDt = this.p.dt * this.p.frameSkip;
-		const limitS = (this.timeout.factor * this.geo0) / this.p.vMax + this.timeout.slack;
-		this.maxSteps = Math.ceil(limitS / policyDt); // Infinity when there is no path: never "lost" by time
+		this.maxSteps = this.limitSteps(this.geo0, this.pose); // same as training when B is reachable
 		this.steps = 0;
 		this.prevAction = [0, 0];
 		this.done = null;
@@ -173,6 +196,11 @@ export class Episode {
 
 	get reachable(): boolean {
 		return this.geo0 < Infinity;
+	}
+
+	/** Is B reachable from (x, y) with the current walls (as of the last grid rebuild)? */
+	reachableFrom(x: number, y: number): boolean {
+		return lookup(this.grid, this.field, x, y) < Infinity;
 	}
 
 	private sense(): void {

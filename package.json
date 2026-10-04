@@ -9,11 +9,14 @@
   },
   "scripts": {
     "test": "vitest run",
-    "typecheck": "tsc -p web --noEmit"
+    "typecheck": "tsc -p web --noEmit",
+    "dev": "vite --config web/dev/vite.config.ts",
+    "build:dev": "vite build --config web/dev/vite.config.ts --outDir ../../.devbuild --emptyOutDir"
   },
   "devDependencies": {
     "@types/node": "^24.19.1",
     "typescript": "^6.0.3",
+    "vite": "^8.3.2",
     "vitest": "^5.0.3"
   }
 }

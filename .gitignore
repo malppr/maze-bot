@@ -22,3 +22,4 @@ artifacts/runs/*/rollouts/*.gif
 artifacts/eval/*/episodes.jsonl
 .venv-gpu/
 artifacts/release/versions/*/eval/episodes.jsonl
+.devbuild/

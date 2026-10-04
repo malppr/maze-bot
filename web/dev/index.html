@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Wheely's maze — dev</title>
+    <style>
+      :root { --bg:#fbfaf7; --surface:#fff; --fg:#1d1c1a; --muted:#67635c; --border:#e7e3db; --accent:#c94436; --accent-fg:#fff; --ai:#2862cf;
+        --radius:12px; --font-mono:'JetBrains Mono',ui-monospace,Consolas,monospace; --shadow:0 10px 30px rgb(40 30 20/.07); color-scheme:light }
+      :root[data-theme=dark] { --bg:#141413; --surface:#1c1c1a; --fg:#ecebe6; --muted:#a29e95; --border:#2e2d2a; --accent:#ee6a57; --accent-fg:#141413;
+        --ai:#7ea8ff; --shadow:0 10px 30px rgb(0 0 0/.35); color-scheme:dark }
+      body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.6 Inter,system-ui,sans-serif }
+      main { width:min(100% - 32px, 1080px); margin:24px auto 64px }
+      header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px }
+      header button { padding:6px 14px; border:1px solid var(--border); border-radius:999px; background:var(--surface); color:var(--fg) }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header><strong>Wheely's maze · dev page</strong><button id="theme">Toggle theme</button></header>
+      <div id="demo"></div>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
