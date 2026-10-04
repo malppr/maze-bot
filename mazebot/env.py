@@ -92,7 +92,9 @@ class MazeEnv(gym.Env):
         self.steps = 0
         self.contacts = 0
         self.path_len = 0.0
+        self.prev_action = np.zeros(2)
         obs, self.rays = observe(self.x, self.y, self.th, self.gx, self.gy, self.caps, self.sim)
+        obs = self._with_memory(obs)
         return obs.astype(np.float32), self._info(success=False)
 
     def step(self, action):
@@ -122,9 +124,16 @@ class MazeEnv(gym.Env):
         self.geo = geo
         self.last_move = math.sqrt((self.x - x0) ** 2 + (self.y - y0) ** 2)
 
+        self.prev_action = np.array([ul, ur])
         obs, self.rays = observe(self.x, self.y, self.th, self.gx, self.gy, self.caps, p)
+        obs = self._with_memory(obs)
         truncated = (not success) and self.steps >= self.max_steps
         return obs.astype(np.float32), float(reward), success, truncated, self._info(success, contact)
+
+    def _with_memory(self, obs: np.ndarray) -> np.ndarray:
+        if self.sim.prev_action_inputs:
+            return np.concatenate([obs, self.prev_action])
+        return obs
 
     def _info(self, success: bool, contact: bool = False) -> dict:
         return {

@@ -73,3 +73,15 @@ def test_seeded_reset_is_deterministic():
         ra = a.step(act)
         rb = b.step(act)
         assert np.array_equal(ra[0], rb[0]) and ra[1] == rb[1]
+
+
+def test_previous_action_memory_inputs():
+    from mazebot.sim import SimParams
+
+    env = MazeEnv(maps=[open_map()], sim=SimParams(prev_action_inputs=True))
+    obs, _ = env.reset(seed=0)
+    assert obs.shape == (10,) and env.observation_space.shape == (10,)
+    assert np.all(obs[8:] == 0.0)
+    obs, *_ = env.step([0.5, -2.0])  # clipped to [-1, 1]
+    assert obs[8:].tolist() == [0.5, -1.0]
+    check_env(MazeEnv(sim=SimParams(prev_action_inputs=True)), skip_render_check=True)

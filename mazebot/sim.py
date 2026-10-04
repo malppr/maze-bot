@@ -26,6 +26,7 @@ class SimParams:
     ray_range: float = 3.0
     goal_dist_scale: float = 10.0  # obs[7] = min(goal distance / scale, 1)
     goal_radius: float = 0.35  # success when the centre is this close to B
+    prev_action_inputs: bool = False  # append the previous (uL, uR) to the observation: one step of memory
 
     ray_angles: tuple[float, ...] = field(init=False)
 
@@ -34,7 +35,7 @@ class SimParams:
 
     @property
     def obs_dim(self) -> int:
-        return len(self.ray_angles) + 3
+        return len(self.ray_angles) + 3 + (2 if self.prev_action_inputs else 0)
 
     @classmethod
     def from_dict(cls, d: dict | None) -> SimParams:
@@ -103,7 +104,7 @@ def observe(x: float, y: float, th: float, gx: float, gy: float, caps: np.ndarra
         sin_b = hx * uy - hy * ux
     else:
         cos_b, sin_b = 1.0, 0.0
-    obs = np.empty(p.obs_dim)
+    obs = np.empty(len(p.ray_angles) + 3)  # env appends the previous action if enabled
     k = len(p.ray_angles)
     obs[:k] = rays / p.ray_range
     obs[k] = sin_b
