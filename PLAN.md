@@ -120,10 +120,10 @@ and decide together (readability of the network panel matters).
 maze-bot/
   pyproject.toml            # uv-managed; deps: numpy, gymnasium; groups: dev (pytest, ruff, matplotlib), train (torch cpu, sb3, tensorboard)
   mazebot/
-    geometry.py  env.py  distance_field.py  mapgen.py  render.py
+    geometry.py  sim.py  env.py  distance_field.py  mapgen.py  render.py
     train.py  evaluate.py  export.py  baselines.py
   presets/                  # demo preset layouts (JSON), shared by Python and TS
-  scripts/                  # render_samples.py, benchmarks
+  scripts/                  # make_presets.py, render_samples.py, bench_env.py
   tests/                    # geometry, rays, collision, kinematics, distance field, mapgen, env/reward
   configs/                  # training configs (yaml)
   artifacts/                # exported weights (per release), eval reports, sample renders
