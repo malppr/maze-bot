@@ -19,6 +19,7 @@ class SimParams:
     radius: float = 0.3  # robot collider radius
     wheel_base: float = 0.6  # distance between wheels
     v_max: float = 1.2  # wheel surface speed at u = 1 (units/s)
+    reverse_max: float = 0.3  # backward body speed capped at this fraction of v_max (rays only look forward)
     dt: float = 1.0 / 30.0  # physics step
     frame_skip: int = 2  # physics steps per policy step (policy at 15 Hz)
     ray_angles_deg: tuple[float, ...] = (-60.0, -30.0, 0.0, 30.0, 60.0)
@@ -54,9 +55,10 @@ def physics_step(x: float, y: float, th: float, ul: float, ur: float, caps: np.n
     """Advance one physics step. Returns (x, y, th, contact).
 
     Differential drive: v = v_max (uL + uR)/2, w = v_max (uL - uR)/b (y-down, so left faster => clockwise).
+    Backward speed is capped at reverse_max * v_max: Wheely can back up slowly but not drive blind.
     Midpoint integration; sub-stepped so the centre never moves more than r/2 per sub-step.
     """
-    v = p.v_max * 0.5 * (ul + ur)
+    v = max(p.v_max * 0.5 * (ul + ur), -p.reverse_max * p.v_max)
     w = p.v_max * (ul - ur) / p.wheel_base
     n = max(1, math.ceil(abs(v) * p.dt / (0.5 * p.radius)))
     h = p.dt / n

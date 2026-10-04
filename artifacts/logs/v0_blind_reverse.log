@@ -1,0 +1,7 @@
+[curriculum] step 500,064: stage 1 {'open': 0.3, 'obstacles': 0.7}
+[val] step 1,000,032 stage 1 score 0.674 (open=1.00 obsta=0.86 scrib=0.63 mazes=0.26 mixed=0.62)
+[curriculum] step 1,000,128: stage 2 {'open': 0.1, 'obstacles': 0.3, 'scribbles': 0.6}
+[val] step 2,000,064 stage 2 score 0.634 (open=1.00 obsta=0.78 scrib=0.55 mazes=0.24 mixed=0.60)
+[val] step 3,000,096 stage 2 score 0.624 (open=0.99 obsta=0.76 scrib=0.61 mazes=0.23 mixed=0.53)
+[val] step 4,000,128 stage 2 score 0.586 (open=0.95 obsta=0.69 scrib=0.55 mazes=0.24 mixed=0.50)
+[val] step 5,000,160 stage 2 score 0.472 (open=0.74 obsta=0.54 scrib=0.49 mazes=0.17 mixed=0.42)

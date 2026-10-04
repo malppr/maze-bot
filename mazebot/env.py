@@ -16,7 +16,7 @@ from .sim import SimParams, goal_distance, observe, physics_step
 @dataclass(frozen=True)
 class RewardParams:
     progress: float = 1.0  # per world unit of geodesic progress
-    contact: float = 0.05  # per policy step in wall contact
+    contact: float = 0.2  # per policy step in wall contact
     time: float = 0.01  # per policy step
     goal: float = 10.0  # on reaching B
     timeout_factor: float = 3.0  # time limit = factor * (geodesic A->B / v_max) + slack

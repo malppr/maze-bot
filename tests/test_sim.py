@@ -23,9 +23,14 @@ def test_equal_wheels_drive_straight():
     assert (x, y, th) == pytest.approx((P.v_max, 0.0, 0.0))
 
 
-def test_reverse():
-    x, y, _, _ = run(0, 0, 0, -1, -1)
-    assert (x, y) == pytest.approx((-P.v_max, 0.0))
+def test_reverse_is_capped():
+    x, y, _, _ = run(0, 0, 0, -1, -1)  # 1 s full reverse
+    assert (x, y) == pytest.approx((-P.reverse_max * P.v_max, 0.0))
+
+
+def test_spin_in_place_not_affected_by_reverse_cap():
+    x, y, _, _ = run(0, 0, 0, 1, -1)
+    assert (x, y) == pytest.approx((0.0, 0.0))
 
 
 def test_spin_in_place_and_direction_convention():

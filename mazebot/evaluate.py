@@ -42,6 +42,10 @@ def make_policy(spec: str, seed: int = 0):
         return RandomPolicy(seed)
     if spec == "reactive":
         return ReactivePolicy()
+    if "@noise=" in spec:  # e.g. weights.json@noise=0.3: Gaussian action noise like during training
+        path, sigma = spec.split("@noise=")
+        mlp, rng, sigma = MLPPolicy.load(path), np.random.default_rng(seed), float(sigma)
+        return lambda obs: np.clip(mlp(obs) + rng.normal(0.0, sigma, 2), -1.0, 1.0)
     return MLPPolicy.load(spec)
 
 
@@ -68,6 +72,7 @@ def run_episode(policy, m: mapgen.Map, record: bool = False) -> dict:
     obs, info = env.reset(seed=0, options={"map": m})
     xs, ys, geos, contacts = [env.x], [env.y], [env.geo], [False]
     acts = []
+    reversing = 0
     while True:
         a = policy(obs)
         obs, _, term, trunc, info = env.step(a)
@@ -77,6 +82,8 @@ def run_episode(policy, m: mapgen.Map, record: bool = False) -> dict:
         contacts.append(info["contact"])
         if record:
             acts.append(np.asarray(a, dtype=np.float64))
+        if a[0] + a[1] < -0.2:  # commanded backwards
+            reversing += 1
         if term or trunc:
             break
     policy_dt = env.sim.dt * env.sim.frame_skip
@@ -91,6 +98,7 @@ def run_episode(policy, m: mapgen.Map, record: bool = False) -> dict:
         # SPL-style efficiency: geodesic optimum / distance actually driven (0 on failure)
         "spl": (env.geo0 / max(env.path_len, env.geo0)) if info["success"] else 0.0,
         "final_geo": env.geo,
+        "reverse_frac": reversing / max(info["steps"], 1),
     }
     if not res["success"]:
         res["failure"] = classify_failure(
@@ -135,6 +143,7 @@ def summarize(results: list[dict]) -> dict:
         "spl": float(np.mean([r["spl"] for r in results])) if n else 0.0,
         "time_to_goal_s": float(np.mean([r["time_s"] for r in succ])) if succ else None,
         "contacts_per_ep": float(np.mean([r["contacts"] for r in results])) if n else 0.0,
+        "reverse_frac": float(np.mean([r["reverse_frac"] for r in results])) if n else 0.0,
         "failures": {f: fails.get(f, 0) / n for f in ("stuck", "looping", "progressing")},
     }
 
