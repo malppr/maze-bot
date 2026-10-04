@@ -1,0 +1,127 @@
+{
+ "policy": "reactive",
+ "n_per_category": 1000,
+ "eval_seed": 20261004,
+ "categories": {
+  "open": {
+   "n": 1000,
+   "success": 1.0,
+   "ci95": [
+    0.9961731014136095,
+    1.0
+   ],
+   "spl": 0.9920245414580566,
+   "time_to_goal_s": 4.782,
+   "contacts_per_ep": 0.0,
+   "reverse_frac": 0.0,
+   "failures": {
+    "stuck": 0.0,
+    "looping": 0.0,
+    "progressing": 0.0
+   }
+  },
+  "obstacles": {
+   "n": 1000,
+   "success": 0.956,
+   "ci95": [
+    0.9414479081796453,
+    0.9670619603095666
+   ],
+   "spl": 0.912070969545397,
+   "time_to_goal_s": 6.215271966527196,
+   "contacts_per_ep": 2.842,
+   "reverse_frac": 0.0,
+   "failures": {
+    "stuck": 0.039,
+    "looping": 0.004,
+    "progressing": 0.001
+   }
+  },
+  "scribbles": {
+   "n": 1000,
+   "success": 0.897,
+   "ci95": [
+    0.8766159605900107,
+    0.9143454819323954
+   ],
+   "spl": 0.8561572035358931,
+   "time_to_goal_s": 6.300260126347084,
+   "contacts_per_ep": 4.017,
+   "reverse_frac": 0.0,
+   "failures": {
+    "stuck": 0.089,
+    "looping": 0.011,
+    "progressing": 0.003
+   }
+  },
+  "mazes": {
+   "n": 1000,
+   "success": 0.686,
+   "ci95": [
+    0.6565682399199134,
+    0.7140081538059494
+   ],
+   "spl": 0.5872506821640382,
+   "time_to_goal_s": 13.463265306122448,
+   "contacts_per_ep": 11.205,
+   "reverse_frac": 0.0,
+   "failures": {
+    "stuck": 0.079,
+    "looping": 0.155,
+    "progressing": 0.08
+   }
+  },
+  "mixed": {
+   "n": 1000,
+   "success": 0.846,
+   "ci95": [
+    0.8223076809446219,
+    0.8670441052335958
+   ],
+   "spl": 0.7942756367088363,
+   "time_to_goal_s": 7.295981087470449,
+   "contacts_per_ep": 11.139,
+   "reverse_frac": 0.0,
+   "failures": {
+    "stuck": 0.122,
+    "looping": 0.024,
+    "progressing": 0.008
+   }
+  },
+  "traps": {
+   "n": 1000,
+   "success": 0.384,
+   "ci95": [
+    0.35435360677146754,
+    0.4145342337005752
+   ],
+   "spl": 0.26532537882386725,
+   "time_to_goal_s": 12.137847222222222,
+   "contacts_per_ep": 6.332,
+   "reverse_frac": 0.0,
+   "failures": {
+    "stuck": 0.059,
+    "looping": 0.553,
+    "progressing": 0.004
+   }
+  },
+  "presets": {
+   "n": 1000,
+   "success": 0.941,
+   "ci95": [
+    0.9246387632925527,
+    0.9539859121542508
+   ],
+   "spl": 0.8467119876597499,
+   "time_to_goal_s": 8.78122564647538,
+   "contacts_per_ep": 5.345,
+   "reverse_frac": 0.0,
+   "failures": {
+    "stuck": 0.008,
+    "looping": 0.031,
+    "progressing": 0.02
+   }
+  }
+ },
+ "seconds": 32.98839630000293
+}

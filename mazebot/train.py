@@ -274,12 +274,15 @@ def main():
     ap.add_argument("--steps", type=int, default=None)
     ap.add_argument("--name", default=None)
     ap.add_argument("--seed", type=int, default=None)
+    ap.add_argument("--hidden", default=None, help="actor hidden sizes, e.g. 8,8 or 64,64")
     args = ap.parse_args()
     cfg = yaml.safe_load(Path(args.config).read_text(encoding="utf-8"))
     if args.steps:
         cfg["total_steps"] = args.steps
     if args.seed is not None:
         cfg["seed"] = args.seed
+    if args.hidden:
+        cfg["hidden"] = [int(h) for h in args.hidden.split(",")]
     name = args.name or f"{Path(args.config).stem}_s{cfg['seed']}"
     train(cfg, name)
 
