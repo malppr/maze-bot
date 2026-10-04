@@ -26,6 +26,8 @@ class SimParams:
     ray_range: float = 3.0
     goal_dist_scale: float = 10.0  # obs[7] = min(goal distance / scale, 1)
     goal_radius: float = 0.35  # success when the centre is this close to B
+    # goal inputs: "sincos_dist" (sin, cos, distance), "sincos" (no distance), "bearing" (angle / pi only)
+    goal_inputs: str = "sincos_dist"
     prev_action_inputs: bool = False  # append the previous (uL, uR) to the observation: one step of memory
 
     ray_angles: tuple[float, ...] = field(init=False)
@@ -35,7 +37,11 @@ class SimParams:
 
     @property
     def obs_dim(self) -> int:
-        return len(self.ray_angles) + 3 + (2 if self.prev_action_inputs else 0)
+        return len(self.ray_angles) + self.goal_dim + (2 if self.prev_action_inputs else 0)
+
+    @property
+    def goal_dim(self) -> int:
+        return {"sincos_dist": 3, "sincos": 2, "bearing": 1}[self.goal_inputs]
 
     @classmethod
     def from_dict(cls, d: dict | None) -> SimParams:
@@ -104,12 +110,16 @@ def observe(x: float, y: float, th: float, gx: float, gy: float, caps: np.ndarra
         sin_b = hx * uy - hy * ux
     else:
         cos_b, sin_b = 1.0, 0.0
-    obs = np.empty(len(p.ray_angles) + 3)  # env appends the previous action if enabled
     k = len(p.ray_angles)
+    obs = np.empty(k + p.goal_dim)  # env appends the previous action if enabled
     obs[:k] = rays / p.ray_range
-    obs[k] = sin_b
-    obs[k + 1] = cos_b
-    obs[k + 2] = min(dist / p.goal_dist_scale, 1.0)
+    if p.goal_inputs == "bearing":  # signed angle in (-1, 1]: + = goal to the right; jumps only dead behind
+        obs[k] = math.atan2(sin_b, cos_b) / math.pi
+    else:
+        obs[k] = sin_b
+        obs[k + 1] = cos_b
+        if p.goal_inputs == "sincos_dist":
+            obs[k + 2] = min(dist / p.goal_dist_scale, 1.0)
     return obs, rays
 
 

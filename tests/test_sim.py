@@ -84,3 +84,22 @@ def test_goal_distance_obs_clipped():
     obs, _ = observe(0.5, 0.5, 0.0, 30, 30, NONE, P)
     assert obs[7] == 1.0
     assert np.all(obs[:5] == 1.0)
+
+
+@pytest.mark.parametrize(
+    "mode, expected",
+    [("sincos_dist", [1.0, 0.0, 0.3]), ("sincos", [1.0, 0.0]), ("bearing", [0.5])],
+)
+def test_goal_input_modes(mode, expected):
+    p = SimParams(goal_inputs=mode)
+    obs, _ = observe(5, 5, 0.0, 5, 8, g.border(10, 10), p)  # goal 90 deg to the right, 3 away
+    assert obs.shape == (5 + len(expected),) and p.obs_dim == len(obs)
+    assert obs[5:] == pytest.approx(expected, abs=1e-12)
+
+
+def test_bearing_mode_sign_and_range():
+    p = SimParams(goal_inputs="bearing")
+    left, _ = observe(5, 5, 0.0, 5, 2, NONE, p)  # goal to the left (counter-clockwise, y up on screen)
+    behind, _ = observe(5, 5, 0.0, 2, 5, NONE, p)
+    assert left[5] == pytest.approx(-0.5)
+    assert abs(behind[5]) == pytest.approx(1.0)

@@ -61,7 +61,11 @@ class MLPPolicy:
             "hidden_activation": "tanh",
             "output": "clip",
             "obs_spec": [f"ray{i + 1}/R" for i in range(len(sim.ray_angles))]
-            + ["sin(goal bearing)", "cos(goal bearing)", "goal distance / scale"]
+            + {
+                "sincos_dist": ["sin(goal bearing)", "cos(goal bearing)", "goal distance / scale"],
+                "sincos": ["sin(goal bearing)", "cos(goal bearing)"],
+                "bearing": ["goal bearing / pi"],
+            }[sim.goal_inputs]
             + (["previous left wheel", "previous right wheel"] if sim.prev_action_inputs else []),
             "act_spec": ["left wheel", "right wheel"],
             "sim_params": sim.to_dict(),

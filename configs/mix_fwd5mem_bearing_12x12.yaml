@@ -1,0 +1,44 @@
+# Memory 12-12, single bearing input, no distance: 5 rays + bearing/pi + previous (uL, uR) -> 8-12-12-2.
+seed: 0
+hidden: [12, 12]
+value_hidden: [64, 64]
+sim:
+  prev_action_inputs: true
+  goal_inputs: bearing
+n_envs: 96
+n_workers: 12          # envs are batched 8 per process (see mazebot/vec.py)
+total_steps: 30000000   # ceiling; early stopping usually ends sooner
+torch_threads: 2
+checkpoint_every: 2000000
+ppo:
+  n_steps: 128          # x 96 envs = 12288 transitions per update
+  batch_size: 4096
+  n_epochs: 10
+  learning_rate: 0.0003
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_range: 0.2
+  ent_coef: 0.0
+  max_grad_norm: 0.5
+  log_std_init: -0.5
+std_schedule:            # cap exploration noise so the deterministic (shipped) policy can't rely on it
+  start: 0.6
+  end: 0.1
+  steps: 6000000
+reward: {}              # defaults in mazebot/env.py RewardParams
+curriculum:
+  threshold: 0.8        # advance when rolling success over `window` episodes >= threshold
+  window: 1000
+  min_steps: 500000
+  max_steps_per_stage: 5000000
+  stages:
+    - {open: 1.0}
+    - {open: 0.3, obstacles: 0.7}
+    - {open: 0.1, obstacles: 0.3, scribbles: 0.6}
+    - {obstacles: 0.2, scribbles: 0.3, mazes: 0.5}
+    - {open: 0.05, obstacles: 0.2, scribbles: 0.3, mazes: 0.25, mixed: 0.2}
+validation:              # separate validation maps (never the test set) for best-checkpoint + early stop
+  every: 1000000
+  n: 100                 # maps per training category
+  patience: 4            # stop after 4 validations in the final stage without +1 pt
+  min_delta: 0.01
