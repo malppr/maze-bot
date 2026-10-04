@@ -16,3 +16,4 @@ artifacts/runs/*/ckpt/
 artifacts/runs/*/model.zip
 artifacts/runs/*/eval/episodes.jsonl
 artifacts/tmp/
+artifacts/logs/
