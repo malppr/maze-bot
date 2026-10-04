@@ -5,7 +5,8 @@ TypeScript (`web/`) for the browser port and demo. Read `PLAN.md` first (design,
 
 ## Commands
 
-- `uv sync` — install (uv manages Python 3.12; there is no system Python)
+- `uv venv --python 3.12` then `uv sync` — project venv in `.venv/` (uv manages Python; there is no system Python).
+  Always run things through `uv run …` (or `.venv/Scripts/python`); never install into a global Python.
 - `uv run pytest` — tests; `uv run ruff check` / `uv run ruff format` — lint/format
 - `uv run python scripts/render_samples.py` — render sample maps of every category
 

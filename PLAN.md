@@ -185,7 +185,7 @@ Each milestone ends with a check run by Claude (tests, metrics, screenshots) and
 - [x] Name: Wheely; demo title "Wheely's maze"; no `mountMascot`.
 - [ ] Final hidden size (6-6 vs 8-8) — after M2 results.
 - [ ] Exact ray angles / range — tune in M2 if results call for it.
-- [ ] License for the public repo (proposal: MIT for code; mascot art stays © Bryan Chew).
+- [x] License: MIT for code; mascot art stays © Bryan Chew.
 - [ ] "Train it live" (in-browser neuroevolution) — later, after M6.
 
 ## 11. Decisions log
@@ -195,3 +195,4 @@ Each milestone ends with a check run by Claude (tests, metrics, screenshots) and
 - **2026-10-04 — Train on random shapes, not strict mazes** (drawing is the main interaction; failures should come from
   missing memory, not OOD shapes). Mazes-only vs mixed ablation in M2. Varying arena size, clipped linear outputs,
   per-step parity accepted.
+- **2026-10-04 — MIT license** (code); mascot art excluded. Python env = uv venv in `.venv/`.

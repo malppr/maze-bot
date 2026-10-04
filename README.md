@@ -8,9 +8,16 @@ Work in progress — see [PLAN.md](PLAN.md).
 
 ## Development
 
+The project uses a uv-managed virtual environment in `.venv/` (Python 3.12, installed by uv).
+
 ```sh
-uv sync                 # installs Python 3.12 and dependencies
+uv venv --python 3.12   # create .venv (uv sync also creates it if missing)
+uv sync                 # install dependencies into .venv
 uv run pytest           # tests
 uv run ruff check       # lint
 uv run python scripts/render_samples.py   # sample maps per category -> artifacts/samples/
 ```
+
+## License
+
+Code: MIT (see [LICENSE](LICENSE)). The Wheely mascot artwork is © Bryan Chew and not MIT-licensed.
