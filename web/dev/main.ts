@@ -1,6 +1,25 @@
 import { mountMazeDemo } from '../src';
+import { VERSIONS } from '../src/demo/versions';
 // Dev only: the site's mascot (not part of this MIT package).
 import sprite from '../../../malppr.github.io/src/assets/mascot/mascot-top.svg?url';
+
+// Failure versions for recording the write-up clips (?v=v0-moonwalker / ?v=v2-scaredy). Never shipped to the site.
+VERSIONS.push(
+  {
+    id: 'v0-moonwalker',
+    name: 'Moonwalker',
+    blurb: 'Learned to drive backwards, blind.',
+    hidden: true,
+    load: () => import('../../artifacts/release/versions/v0-moonwalker/weights.json'),
+  },
+  {
+    id: 'v2-scaredy',
+    name: 'Scaredy-Wheely',
+    blurb: 'Too scared of walls to move.',
+    hidden: true,
+    load: () => import('../../artifacts/release/versions/v2-scaredy/weights.json'),
+  },
+);
 
 const q = new URLSearchParams(location.search);
 const el = document.getElementById('demo')!;

@@ -79,7 +79,7 @@ export function mountMazeDemo(el: HTMLElement, opts: MazeDemoOptions = {}): Maze
 	root.innerHTML = `
 		<div class="wm-versions">
 			<div class="wm-chips" role="radiogroup" aria-label="Which Wheely">
-				${VERSIONS.map((v) => `<button type="button" class="wm-chip" role="radio" aria-checked="false" data-v="${v.id}">${v.name}</button>`).join('')}
+				${VERSIONS.filter((v) => !v.hidden).map((v) => `<button type="button" class="wm-chip" role="radio" aria-checked="false" data-v="${v.id}">${v.name}</button>`).join('')}
 			</div>
 			<p class="wm-blurb"></p>
 		</div>

@@ -7,6 +7,7 @@ export interface Version {
 	name: string;
 	blurb: string;
 	load?: () => Promise<{ default: unknown }>; // none: the hand-written rule
+	hidden?: boolean; // not offered as a chip (dev page only: failure versions for the write-up clips)
 }
 
 export const VERSIONS: Version[] = [
