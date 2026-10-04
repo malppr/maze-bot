@@ -59,7 +59,7 @@ Sign gives direction, so spin-in-place and reverse are free.
 
 ### Network
 
-MLP **8 → 6 → 6 → 2**, tanh hidden layers, 104 parameters — small enough to draw every weight and neuron.
+MLP **8 → 6 → 6 → 2**, tanh hidden layers, 110 parameters — small enough to draw every weight and neuron.
 Hidden width stays a config value: if 6-6 clearly can't learn freehand maps, compare with 8-8 and a 64-64 upper bound in M2
 and decide together (readability of the network panel matters).
 

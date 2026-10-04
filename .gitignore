@@ -11,3 +11,8 @@ artifacts/tmp/
 node_modules/
 web/dist/
 .DS_Store
+artifacts/runs/*/tb/
+artifacts/runs/*/ckpt/
+artifacts/runs/*/model.zip
+artifacts/runs/*/eval/episodes.jsonl
+artifacts/tmp/
