@@ -246,3 +246,9 @@ Each milestone ends with a check run by Claude (tests, metrics, screenshots) and
   presets, mixed; same shipped actor as the plain 12-12-4). Multi-seed comparison skipped (Bryan's call); the
   write-up should say the pick is from single-seed runs. Release bundle in `artifacts/release/`.
 - **2026-10-04 — MIT license** (code); mascot art excluded. Python env = uv venv in `.venv/`.
+- **2026-10-04 — Demo versions and UX (with Bryan):** playable: By-the-Book (heuristic), Rookie (`mix_6x6`), Owl Eyes (`mix_360_12x12`),
+  Wheely (final). Write-up only: Moonwalker (v0, clip on Open field), Scaredy-Wheely (v2, clip on Slalom; freezes in 24% of empty
+  arenas with no wall contact), one-step memory and GRU (numbers only). Bundle + test-set reports: `artifacts/release/versions/`
+  (`scripts/make_versions.py`). Write-up clips are recorded from the web demo, not matplotlib. Site layout and brain panel: site
+  PLAN §14 (2026-10-04). The network panel adapts to each version's arch (8-6-6-2, 10-12-12-2, 10-12-12-4-2; rule view for
+  By-the-Book), so §1's "8 → 6 → 6 → 2" is superseded.
