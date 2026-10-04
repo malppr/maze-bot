@@ -29,9 +29,9 @@ TS port are in `artifacts/release/` (README.md there). Next work: web wiring, se
   `scripts/progress.py <run>` (validation curves + trajectories per checkpoint), `scripts/rollouts.py <weights>` (sheets + GIFs).
 - Other: `scripts/render_samples.py` (map sheets), `scripts/make_presets.py` (rebuild presets.json), `scripts/bench_env.py`.
 - Web (`web/`, Node 24 at `C:\Program Files\nodejs`): `npm ci`, `npm test` (vitest parity tests), `npm run typecheck`.
+  Regenerate parity fixtures after any sim/policy change: `uv run python scripts/make_parity_fixtures.py` → `web/test/fixtures/`.
 - Site: `npm run dev` (demo dev page, port 5180); `npm run sync:site` copies the demo build into `../malppr.github.io/src/vendor/maze-bot/`
   (then commit it in the site repo). Commit here first so `SOURCE.txt` names a clean commit.
-  Regenerate parity fixtures after any sim/policy change: `uv run python scripts/make_parity_fixtures.py` → `web/test/fixtures/`.
 - Versions bundle (demo Wheelys + test-set reports): `uv run python scripts/make_versions.py --skip-gifs` → `artifacts/release/versions/`.
 - TensorBoard: `uv run tensorboard --logdir artifacts/runs` → http://localhost:6006
 

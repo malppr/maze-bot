@@ -186,7 +186,7 @@ Each milestone ends with a check run by Claude (tests, metrics, screenshots) and
 | M2 ✅ | PPO training + curriculum + held-out evaluation + baselines | Per-category held-out success rates, failure taxonomy, rollout GIFs; hidden size decided with Bryan |
 | M3 ✅ | `weights.json` export + TS sim port + parity tests | Parity tests pass locally and in CI |
 | M4 ✅ | `mountMazeDemo`: canvas, presets, draw mode, path-check warning, network panel, controls | Works in the dev page; screenshots desktop + 390 px, light + dark, reviewed |
-| M5 (in review) | Site wiring: self-contained copy via `npm run sync:site`; `/playground` is the demo | Site `npm run check:all` passes; Bryan reviews `npm run dev` + `npm run preview`; tag ready to push |
+| M5 (in review) | Site wiring: self-contained copy via `npm run sync:site`; `/playground` is the demo | Site `npm run check:all` passes; Bryan reviews `npm run dev` + `npm run preview` |
 | M6 | Write-up (method, reward design, results, failure modes, GIFs) → README + site project page "Wheely's maze" (tags robot-learning + ai) | Bryan review |
 
 ## 9. Risks
